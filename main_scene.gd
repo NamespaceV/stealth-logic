@@ -4,6 +4,7 @@ extends Node2D
 var tile_scene = load("res://Interactables/FloorTile/floor_tile.tscn") as PackedScene
 
 const AUTOSAVE_PATH = "user://AUTOSAVE.res"
+const DEFAULT_LEVEL_PATH = "res://Saves/deafult_level.res"
 
 var grid = []
 var selected_tile = null
@@ -58,7 +59,7 @@ func get_adjacent_tile(tile:FloorTile, dir:Dir) -> FloorTile:
 
 func _ready() -> void:
 	load_level(AUTOSAVE_PATH)
-	file_dialog.current_path = "res://Levels"
+	file_dialog.current_path = "res://Levels" #OS.get_executable_path().get_base_dir() + "/Levels"
 
 func tile_select(coord:Vector2) -> void:
 	if play_mode: return
@@ -142,11 +143,13 @@ func load_level(path:String) -> void: # edited_level
 	var level = load(path) as LevelData
 	if not level:
 		push_warning("no level on ", path)
-		level =  load("res://Levels/deafult.res") as LevelData
+		level =  load(DEFAULT_LEVEL_PATH) as LevelData
 	var tiles = $Tiles
 
 	while tiles.get_child_count() > 0:
-		tiles.remove_child(tiles.get_child(tiles.get_child_count()-1))
+		var child : Node = tiles.get_child(tiles.get_child_count()-1)
+		tiles.remove_child(child)
+		child.queue_free()
 	selected_tile = null
 	grid = []
 
@@ -166,7 +169,7 @@ func load_level(path:String) -> void: # edited_level
 func _on_play_button_pressed() -> void:
 	if play_mode:
 		play_mode = null
-		load_level("edited_level")
+		load_level(AUTOSAVE_PATH)
 		play_button.text = "Play"
 		save_button.set_disabled(false)
 		load_button.set_disabled(false)
