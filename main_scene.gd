@@ -160,7 +160,7 @@ func _on_play_button_pressed() -> void:
 		$CanvasLayer/PlayButton.text = "Play"
 	else:
 		if selected_tile:
-			selected_tile.change_selected(false)
+			selected_tile.set_selected(false)
 		selected_tile = null
 		play_mode = PlayMode.new(self)
 		$CanvasLayer/PlayButton.text = "Exit Play"
