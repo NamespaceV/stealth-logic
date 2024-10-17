@@ -77,7 +77,10 @@ class EnemyState extends RefCounted:
 				find_player(adjacent_tile, dir)
 
 		if last_seen_active:
-			move_to(mgr.get_adjacent_tile(get_tile(), last_seen_dir))
+			var adjacent = mgr.get_adjacent_tile(get_tile(), last_seen_dir)
+			if adjacent.tile_type != FloorTile.TileType.EMPTY:
+				return
+			move_to(adjacent)
 			last_seen_distance -= 1
 			if last_seen_distance == 0:
 				last_seen_active = false
