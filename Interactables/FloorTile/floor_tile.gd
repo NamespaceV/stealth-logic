@@ -52,9 +52,7 @@ func toggle_wall(dir : GameManager.Dir):
 	walls[dir] = !walls[dir]
 
 func toggle_tile_type():
-	tile_type += 1
-	tile_type %= 3
-	set_tile_type(tile_type)
+	set_tile_type((tile_type + 1) % 3 as TileType)
 
 func set_tile_type(type:TileType):
 	tile_type = type
