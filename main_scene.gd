@@ -3,6 +3,8 @@ extends Node2D
 
 var tile_scene = load("res://Interactables/FloorTile/floor_tile.tscn") as PackedScene
 
+const AUTOSAVE_PATH = "user://AUTOSAVE.res"
+
 var grid = []
 var selected_tile = null
 
@@ -23,6 +25,11 @@ var DIR_TO_OFFSET = [
 var play_mode: PlayMode
 
 var last_mouse_position
+
+@onready var play_button : Button  = $CanvasLayer/HBoxContainer/PlayButton
+@onready var save_button : Button = $CanvasLayer/HBoxContainer/SaveButton
+@onready var load_button : Button  = $CanvasLayer/HBoxContainer/LoadButton
+@onready var file_dialog :  FileDialog = $CanvasLayer/FileDialog
 
 func dir_to_offset(dir:Dir) -> Vector2:
 	return DIR_TO_OFFSET[dir]
@@ -50,7 +57,8 @@ func get_adjacent_tile(tile:FloorTile, dir:Dir) -> FloorTile:
 	return get_tile(adjacent_offset)
 
 func _ready() -> void:
-	load_level("edited_level")
+	load_level(AUTOSAVE_PATH)
+	file_dialog.current_path = "res://Levels"
 
 func tile_select(coord:Vector2) -> void:
 	if play_mode: return
@@ -67,7 +75,7 @@ func tile_change(coord:Vector2) -> void:
 
 	var tile = get_tile(coord)
 	tile.toggle_tile_type()
-	save_level("edited_level")
+	save_level(AUTOSAVE_PATH)
 
 
 func is_dir_pressed() -> bool:
@@ -112,9 +120,9 @@ func toggle_wall(tile, dir)-> void:
 	var adjacent = get_adjacent_tile(tile, dir)
 	if adjacent:
 		adjacent.toggle_wall(opposite_dir(dir))
-	save_level("edited_level")
+	save_level(AUTOSAVE_PATH)
 
-func save_level(level_name: String):
+func save_level(path: String):
 	var level = LevelData.new()
 	level.size = get_grid_size()
 
@@ -126,13 +134,15 @@ func save_level(level_name: String):
 			level.walls[x].push_back(tile.walls)
 			level.types[x].push_back(tile.tile_type)
 
+	ResourceSaver.save(level, path)
 
-	ResourceSaver.save(level, "res://Saves/Levels/%s.res" % level_name)
 
-
-func load_level(level_name:String) -> void: # edited_level
+func load_level(path:String) -> void: # edited_level
 	selected_tile = null
-	var level = load("res://Saves/Levels/%s.res" % level_name) as LevelData
+	var level = load(path) as LevelData
+	if not level:
+		push_warning("no level on ", path)
+		level =  load("res://Levels/deafult.res") as LevelData
 	var tiles = $Tiles
 
 	while tiles.get_child_count() > 0:
@@ -157,10 +167,33 @@ func _on_play_button_pressed() -> void:
 	if play_mode:
 		play_mode = null
 		load_level("edited_level")
-		$CanvasLayer/PlayButton.text = "Play"
+		play_button.text = "Play"
+		save_button.set_disabled(false)
+		load_button.set_disabled(false)
 	else:
 		if selected_tile:
 			selected_tile.set_selected(false)
 		selected_tile = null
 		play_mode = PlayMode.new(self)
-		$CanvasLayer/PlayButton.text = "Exit Play"
+		play_button.text = "Exit Play"
+		save_button.set_disabled(true)
+		load_button.set_disabled(true)
+
+
+func _on_save_pressed() -> void:
+	file_dialog.file_mode = FileDialog.FileMode.FILE_MODE_SAVE_FILE
+	file_dialog.title = "Save level"
+	file_dialog.visible = true
+
+
+func _on_load_pressed() -> void:
+	file_dialog.file_mode = FileDialog.FileMode.FILE_MODE_OPEN_FILE
+	file_dialog.title = "Open level"
+	file_dialog.visible = true
+
+
+func _on_file_dialog_file_selected(path: String) -> void:
+	if file_dialog.file_mode == FileDialog.FileMode.FILE_MODE_SAVE_FILE:
+		save_level(path)
+	else :
+		load_level(path)
