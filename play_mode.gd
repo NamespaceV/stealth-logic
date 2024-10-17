@@ -16,9 +16,13 @@ func _init(manager:GameManager):
 				FloorTile.TileType.EMPTY:
 					pass
 				FloorTile.TileType.PLAYER:
+					if player_coord:
+						push_warning("multiple players not supported", player_coord, coord)
 					player_coord = coord
 				FloorTile.TileType.ENEMY:
 					enemy_coords.push_back(coord)
+	var player_tile = mgr.get_tile(player_coord)
+	player_tile.set_selected(true)
 
 func on_input(dir: GameManager.Dir):
 	var player_tile = mgr.get_tile(player_coord)
@@ -28,3 +32,5 @@ func on_input(dir: GameManager.Dir):
 		goal_tile.set_tile_type(FloorTile.TileType.PLAYER)
 		player_tile.set_tile_type(FloorTile.TileType.EMPTY)
 		player_coord = goal_tile.coord
+		goal_tile.set_selected(true)
+		player_tile.set_selected(false)

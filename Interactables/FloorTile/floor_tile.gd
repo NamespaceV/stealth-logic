@@ -47,7 +47,7 @@ func can_move(dir):
 	return !walls[dir]
 
 
-func change_selected(val:bool):
+func set_selected(val:bool):
 	selected = val
 	$BG.texture = selectedTex if selected else defaultTex
 

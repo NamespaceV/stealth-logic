@@ -56,9 +56,9 @@ func tile_select(coord:Vector2) -> void:
 	if play_mode: return
 
 	if selected_tile:
-		selected_tile.change_selected(false)
+		selected_tile.set_selected(false)
 	var tile = get_tile(coord)
-	tile.change_selected(true)
+	tile.set_selected(true)
 	selected_tile = tile
 
 
