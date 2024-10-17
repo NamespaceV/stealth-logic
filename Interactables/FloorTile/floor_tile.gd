@@ -42,6 +42,11 @@ func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int
 		# print(name, "->", event)
 		mgr.tile_change(coord)
 
+
+func can_move(dir):
+	return !walls[dir]
+
+
 func change_selected(val:bool):
 	selected = val
 	$BG.texture = selectedTex if selected else defaultTex

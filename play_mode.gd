@@ -23,7 +23,8 @@ func _init(manager:GameManager):
 func on_input(dir: GameManager.Dir):
 	var player_tile = mgr.get_tile(player_coord)
 	var goal_tile =  mgr.get_adjacent_tile(player_tile, dir)
-	if goal_tile && goal_tile.tile_type == FloorTile.TileType.EMPTY:
+	if goal_tile and goal_tile.tile_type == FloorTile.TileType.EMPTY\
+			and player_tile.can_move(dir):
 		goal_tile.set_tile_type(FloorTile.TileType.PLAYER)
 		player_tile.set_tile_type(FloorTile.TileType.EMPTY)
 		player_coord = goal_tile.coord
