@@ -6,10 +6,19 @@ var mgr:  GameManager
 
 var selected := false
 
+enum TileType
+{
+	EMPTY,
+	PLAYER,
+	ENEMY,
+}
+
 @export var selectedTex : Texture2D
 var defaultTex : Texture2D
 
 @export var walls = [true, true, true, true]
+
+var tile_type:TileType
 
 func register(tile_x,tile_y,game_manager: GameManager):
 	mgr = game_manager
@@ -27,7 +36,11 @@ func _on_area_2d_input_event(_viewport: Node, event: InputEvent, _shape_idx: int
 	if event is InputEventMouse and event.is_pressed() \
 			and event.button_index == MOUSE_BUTTON_LEFT:
 		# print(name, "->", event)
-		mgr.tile_clicked(coord)
+		mgr.tile_select(coord)
+	if event is InputEventMouse and event.is_pressed() \
+			and event.button_index == MOUSE_BUTTON_RIGHT:
+		# print(name, "->", event)
+		mgr.tile_change(coord)
 
 func change_selected(val:bool):
 	selected = val
@@ -37,3 +50,13 @@ func toggle_wall(dir : GameManager.Dir):
 	var wall = $Walls.get_child(dir) as Polygon2D
 	wall.visible = !wall.visible
 	walls[dir] = !walls[dir]
+
+func toggle_tile_type():
+	tile_type += 1
+	tile_type %= 3
+	set_tile_type(tile_type)
+
+func set_tile_type(type:TileType):
+	tile_type = type
+	$Interactable/Enemy.visible = type == TileType.ENEMY
+	$Interactable/Player.visible = type == TileType.PLAYER

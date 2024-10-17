@@ -59,4 +59,15 @@ scale = Vector2(1.00395, 1.18182)
 color = Color(0, 0, 0, 1)
 polygon = PackedVector2Array(-132.972, 6.76923, -132.972, -9.30769, 129.988, -9.30769, 129.988, 6.76923)
 
+[node name="Interactable" type="Node2D" parent="."]
+
+[node name="Player" type="Polygon2D" parent="Interactable"]
+visible = false
+polygon = PackedVector2Array(-46, -83, 33, -92, 74, -60, 42, -22, 36, 50, 67, 89, -57, 91, -2, 56, -5, -9, -61, -50)
+
+[node name="Enemy" type="Polygon2D" parent="Interactable"]
+visible = false
+color = Color(0.687602, 0.0938713, 0.182004, 1)
+polygon = PackedVector2Array(-46, -83, 33, -92, 74, -60, 42, -22, 36, 50, 67, 89, -57, 91, -2, 56, -5, -9, -61, -50)
+
 [connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]

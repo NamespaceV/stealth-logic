@@ -42,12 +42,19 @@ func get_adjacent_tile(tile:FloorTile, dir:Dir) -> FloorTile:
 func _ready() -> void:
 	load_level("edited_level")
 
-func tile_clicked(coord:Vector2) -> void:
+func tile_select(coord:Vector2) -> void:
 	if selected_tile:
 		selected_tile.change_selected(false)
 	var tile = get_tile(coord)
 	tile.change_selected(true)
 	selected_tile = tile
+
+
+func tile_change(coord:Vector2) -> void:
+	var tile = get_tile(coord)
+	tile.toggle_tile_type()
+	save_level("edited_level")
+
 
 func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed("up"):
@@ -81,9 +88,12 @@ func save_level(level_name: String):
 
 	for x in level.size.x:
 		level.walls.push_back([])
+		level.types.push_back([])
 		for y in level.size.y :
 			var tile = get_tile(Vector2(x,y))
 			level.walls[x].push_back(tile.walls)
+			level.types[x].push_back(tile.tile_type)
+
 
 	ResourceSaver.save(level, "res://Saves/Levels/%s.res" % level_name)
 
@@ -106,5 +116,6 @@ func load_level(level_name:String) -> void: # edited_level
 			for dir in 4:
 				if not level.walls[x][y][dir]:
 					tile.toggle_wall(dir)
+				tile.set_tile_type(level.types[x][y])
 			grid[x].push_back(tile)
 			tiles.add_child(tile)
