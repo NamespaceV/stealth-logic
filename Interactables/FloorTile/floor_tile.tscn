@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3 uid="uid://c2jwakudw37ix"]
+
+[ext_resource type="Script" path="res://Interactables/FloorTile/floor_tile.gd" id="1_qonjt"]
+
+[sub_resource type="Gradient" id="Gradient_6kj0a"]
+colors = PackedColorArray(0.326907, 0, 0, 1, 0.944186, 0.270259, 0.248372, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_hfan4"]
+gradient = SubResource("Gradient_6kj0a")
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_27e7i"]
+size = Vector2(254, 258)
+
+[sub_resource type="Gradient" id="Gradient_328k0"]
+colors = PackedColorArray(0.306923, 0.306923, 0.306923, 1, 0.187176, 0.187176, 0.187176, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dn07i"]
+gradient = SubResource("Gradient_328k0")
+
+[node name="FloorTile" type="Node2D"]
+script = ExtResource("1_qonjt")
+selectedTex = SubResource("GradientTexture1D_hfan4")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+position = Vector2(2, 1)
+shape = SubResource("RectangleShape2D_27e7i")
+
+[node name="BG" type="Sprite2D" parent="."]
+scale = Vector2(1, 256)
+texture = SubResource("GradientTexture1D_dn07i")
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="Wall E" type="Polygon2D" parent="Walls"]
+position = Vector2(129, 1.00003)
+rotation = 1.5708
+scale = Vector2(1.00395, 1.18182)
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(-132.972, 6.76923, -132.972, -9.30769, 129.988, -9.30769, 129.988, 6.76923)
+
+[node name="Wall S" type="Polygon2D" parent="Walls"]
+position = Vector2(1, 132)
+scale = Vector2(1.00395, 1.18182)
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(-132.972, 6.76923, -132.972, -9.30769, 129.988, -9.30769, 129.988, 6.76923)
+
+[node name="Wall W" type="Polygon2D" parent="Walls"]
+position = Vector2(-129, 1.99998)
+rotation = 1.5708
+scale = Vector2(1.00395, 1.18182)
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(-132.972, 6.76923, -132.972, -9.30769, 129.988, -9.30769, 129.988, 6.76923)
+
+[node name="Wall N" type="Polygon2D" parent="Walls"]
+position = Vector2(-1.50198, -123)
+scale = Vector2(1.00395, 1.18182)
+color = Color(0, 0, 0, 1)
+polygon = PackedVector2Array(-132.972, 6.76923, -132.972, -9.30769, 129.988, -9.30769, 129.988, 6.76923)
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]
