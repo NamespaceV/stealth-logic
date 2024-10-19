@@ -68,4 +68,13 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         result.Walls = new List<bool>(_walls);
         return result;
     }
+
+    public void ReadFromData(TileData tileData)
+    {
+        SetTileType(tileData.Type);
+        _walls = new List<bool>(tileData.Walls);
+        for (int i = 0; i < 4; ++i){
+            Walls[i].SetActive(_walls[i]);
+        }
+    }
 }

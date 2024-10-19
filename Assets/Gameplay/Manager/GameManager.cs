@@ -18,7 +18,7 @@ namespace Assets.Gameplay.Manager
         public GameObject TilePrefab;
         private Grid<Tile> _grid = new Grid<Tile>();
 
-        private Vector2Int _selectedTileCoord;
+        private Vector2Int? _selectedTileCoord;
 
         public void Start()
         {
@@ -40,7 +40,7 @@ namespace Assets.Gameplay.Manager
             {
                 if (_selectedTileCoord != null)
                 {
-                    _grid.GetTile(_selectedTileCoord).SetSelected(false);
+                    _grid.GetTile(_selectedTileCoord.Value).SetSelected(false);
                 }
                 _selectedTileCoord = coord;
                 _grid.GetTile(coord).SetSelected(true);
@@ -62,8 +62,8 @@ namespace Assets.Gameplay.Manager
             var dir = InputToDirection(input);
             if (dir == null){ return; }
             Debug.Log($"Changing wall {_selectedTileCoord} {dir}");
-            _grid.GetTile(_selectedTileCoord).ToggleWall(dir.Value);
-            _grid.GetAdjacentTile(_selectedTileCoord, dir.Value)?.ToggleWall(dir.Value.Opposite());
+            _grid.GetTile(_selectedTileCoord.Value).ToggleWall(dir.Value);
+            _grid.GetAdjacentTile(_selectedTileCoord.Value, dir.Value)?.ToggleWall(dir.Value.Opposite());
         }
 
         static Direction? InputToDirection(Vector2 input)
@@ -88,6 +88,34 @@ namespace Assets.Gameplay.Manager
                 }
             }
             File.WriteAllText(path, JsonUtility.ToJson(data));
+        }
+
+        public void LoadLevel() {
+            var path = EditorUtility.OpenFilePanel("SaveLevel", "C:/levels", "json");
+            if (string.IsNullOrEmpty(path)) return;
+            var fileText = File.ReadAllText(path);
+            var data = JsonUtility.FromJson<LevelData>(fileText);
+
+            _selectedTileCoord = null;
+            foreach (var f in _grid)
+            {
+                Debug.Log("Destroy " + f);
+                Destroy(f.gameObject);
+            }
+            _grid.Clear();
+
+            for (int x = 0; x < data.Size.x; ++x)
+            {
+                for (int y = 0; y < data.Size.y; ++y)
+                {
+                    var coord = new Vector2Int(x, y);
+                    var go = Instantiate(TilePrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
+                    var tile = go.GetComponent<Tile>();
+                    tile.ReadFromData(data.Tiles[x][y]);
+                    tile.Register(this, coord);
+                    _grid.SetTile(coord, tile);
+                }
+            }
         }
     }
 }

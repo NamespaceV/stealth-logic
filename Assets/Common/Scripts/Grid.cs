@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,7 +33,7 @@ namespace Assets.Common.Scripts
         }
     }
 
-    public class Grid<T>
+    public class Grid<T> : IEnumerable<T>
     {
         private List<List<T>> _tiles = new List<List<T>>();
 
@@ -67,6 +68,25 @@ namespace Assets.Common.Scripts
             var x = _tiles.Count;
             if (x == 0) return new Vector2Int(0, 0);
             return new Vector2Int(x, _tiles[0].Count);
+        }
+
+        public void Clear()
+        {
+            _tiles.Clear();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (var x = 0; x < _tiles.Count; ++x){
+                for (var y = 0; y < _tiles[x].Count; ++y){ 
+                    yield return _tiles[x][y];
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
