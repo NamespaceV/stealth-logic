@@ -77,4 +77,14 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             Walls[i].SetActive(_walls[i]);
         }
     }
+
+    public Vector2Int GetCoords()
+    {
+        return _coord;
+    }
+
+    public bool AllowsMove(Direction dir)
+    {
+        return !_walls[(int)dir];
+    }
 }

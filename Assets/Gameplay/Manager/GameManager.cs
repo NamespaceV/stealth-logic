@@ -19,6 +19,7 @@ namespace Assets.Gameplay.Manager
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
+        private SingleGameRun _currentPlay;
 
         public void Start()
         {
@@ -34,8 +35,18 @@ namespace Assets.Gameplay.Manager
             }
         }
 
+        public Grid<Tile> GetGrid() { return _grid; }
+
         public void TileClicked(Vector2Int coord, PointerEventData.InputButton button)
         {
+
+            if (_currentPlay != null)
+            {
+                _currentPlay.HandleClick(coord, button);
+                return;
+            }
+
+
             if (button == PointerEventData.InputButton.Left)
             {
                 if (_selectedTileCoord != null)
@@ -55,15 +66,28 @@ namespace Assets.Gameplay.Manager
         }
 
         public void OnMove(InputValue moveValue) {
-            if (_selectedTileCoord == null){
-                return;
-            }
+           
             var input = moveValue.Get<Vector2>();
             var dir = InputToDirection(input);
             if (dir == null){ return; }
-            Debug.Log($"Changing wall {_selectedTileCoord} {dir}");
-            _grid.GetTile(_selectedTileCoord.Value).ToggleWall(dir.Value);
-            _grid.GetAdjacentTile(_selectedTileCoord.Value, dir.Value)?.ToggleWall(dir.Value.Opposite());
+
+            if (_currentPlay != null)
+            {
+                _currentPlay.MakeMove(dir);
+                return;
+            }
+            // EDITOR
+            if (_selectedTileCoord != null)
+            {
+                toggleWall(_selectedTileCoord.Value, dir.Value);
+            }
+        }
+
+        private void toggleWall(Vector2Int tileCoord, Direction dir)
+        {
+            Debug.Log($"Changing wall {tileCoord} {dir}");
+            _grid.GetTile(tileCoord).ToggleWall(dir);
+            _grid.GetAdjacentTile(tileCoord, dir)?.ToggleWall(dir.Opposite());
         }
 
         static Direction? InputToDirection(Vector2 input)
@@ -76,6 +100,7 @@ namespace Assets.Gameplay.Manager
         }
 
         public void SaveLevel() {
+            if (_currentPlay != null) return;
             var path = EditorUtility.SaveFilePanel("SaveLevel", "C:/levels", "level", "json");
             if (string.IsNullOrEmpty(path)) return;
             var data = new LevelData();
@@ -91,6 +116,7 @@ namespace Assets.Gameplay.Manager
         }
 
         public void LoadLevel() {
+            if (_currentPlay != null) return;
             var path = EditorUtility.OpenFilePanel("SaveLevel", "C:/levels", "json");
             if (string.IsNullOrEmpty(path)) return;
             var fileText = File.ReadAllText(path);
@@ -116,6 +142,15 @@ namespace Assets.Gameplay.Manager
                     _grid.SetTile(coord, tile);
                 }
             }
+        }
+
+        public void StartRun()
+        {
+            if (_selectedTileCoord.HasValue){
+                _grid.GetTile(_selectedTileCoord.Value).SetSelected(false);
+                _selectedTileCoord = null;
+            }
+            _currentPlay = new SingleGameRun(this);
         }
     }
 }
