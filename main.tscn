@@ -36,7 +36,7 @@ text = "Load"
 initial_position = 2
 size = Vector2i(303, 500)
 min_size = Vector2i(300, 400)
-access = 2
+access = 1
 filters = PackedStringArray("*.res")
 
 [connection signal="pressed" from="CanvasLayer/HBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]

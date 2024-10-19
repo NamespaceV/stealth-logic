@@ -1,14 +1,6 @@
 class_name GameManager
 extends Node2D
 
-var tile_scene = load("res://Interactables/FloorTile/floor_tile.tscn") as PackedScene
-
-const AUTOSAVE_PATH = "user://AUTOSAVE.res"
-const DEFAULT_LEVEL_PATH = "res://Saves/deafult_level.res"
-
-var grid = []
-var selected_tile = null
-
 enum Dir {
 	RIGHT,
 	DOWN,
@@ -16,15 +8,22 @@ enum Dir {
 	UP,
 }
 
-var DIR_TO_OFFSET = [
+
+
+const LEVELS_DEFAULT_PATH = "user://Levels/"
+const AUTOSAVE_PATH = "user://AUTOSAVE.res"
+const DEFAULT_LEVEL_PATH = "res://Saves/deafult_level.res"
+const DIR_TO_OFFSET = [
 	Vector2(1,0),
 	Vector2(0,1),
 	Vector2(-1,0),
 	Vector2(0,-1),
 ]
 
+var tile_scene = load("res://Interactables/FloorTile/floor_tile.tscn") as PackedScene
+var grid : Array = [] # Array<Array<FloorTile>>
+var selected_tile : FloorTile = null
 var play_mode: PlayMode
-
 var last_mouse_position
 
 @onready var play_button : Button  = $CanvasLayer/HBoxContainer/PlayButton
@@ -59,7 +58,9 @@ func get_adjacent_tile(tile:FloorTile, dir:Dir) -> FloorTile:
 
 func _ready() -> void:
 	load_level(AUTOSAVE_PATH)
-	file_dialog.current_path = "res://Levels" #OS.get_executable_path().get_base_dir() + "/Levels"
+	DirAccess.make_dir_absolute(LEVELS_DEFAULT_PATH)
+	file_dialog.current_path = LEVELS_DEFAULT_PATH
+	#OS.get_executable_path().get_base_dir() + "/Levels"
 
 func tile_select(coord:Vector2) -> void:
 	if play_mode: return
@@ -104,7 +105,7 @@ func _physics_process(_delta: float) -> void:
 		var dir = get_dir_pressed()
 		if play_mode:
 			play_mode.on_input(dir)
-		else:
+		elif selected_tile:
 			toggle_wall(selected_tile,dir)
 
 
