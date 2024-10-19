@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.U2D.Aseprite;
@@ -20,6 +21,9 @@ namespace Assets.Gameplay.Manager
 
         private Vector2Int? _selectedTileCoord;
         private SingleGameRun _currentPlay;
+
+        [SerializeField] private TMP_Text _runButtonText;
+        private string _cleanLevelCopy;
 
         public void Start()
         {
@@ -99,33 +103,45 @@ namespace Assets.Gameplay.Manager
             return null;
         }
 
-        public void SaveLevel() {
+        public void SaveLevel()
+        {
             if (_currentPlay != null) return;
             var path = EditorUtility.SaveFilePanel("SaveLevel", "C:/levels", "level", "json");
             if (string.IsNullOrEmpty(path)) return;
+            LevelData data = serializeCurrentLevel();
+            File.WriteAllText(path, JsonUtility.ToJson(data));
+        }
+
+        private LevelData serializeCurrentLevel()
+        {
             var data = new LevelData();
             data.Size = _grid.GetSize();
-            for (var x = 0; x < data.Size.x; ++x){
+            for (var x = 0; x < data.Size.x; ++x)
+            {
                 data.Tiles.Add(new ListWrapper<TileData>());
                 for (var y = 0; y < data.Size.y; ++y)
                 {
                     data.Tiles[x].Add(_grid.GetTile(new Vector2Int(x, y)).ToData());
                 }
             }
-            File.WriteAllText(path, JsonUtility.ToJson(data));
+            return data;
         }
 
-        public void LoadLevel() {
+        public void LoadLevel()
+        {
             if (_currentPlay != null) return;
             var path = EditorUtility.OpenFilePanel("SaveLevel", "C:/levels", "json");
             if (string.IsNullOrEmpty(path)) return;
             var fileText = File.ReadAllText(path);
             var data = JsonUtility.FromJson<LevelData>(fileText);
+            loadLevelData(data);
+        }
 
+        private void loadLevelData(LevelData data)
+        {
             _selectedTileCoord = null;
             foreach (var f in _grid)
             {
-                Debug.Log("Destroy " + f);
                 Destroy(f.gameObject);
             }
             _grid.Clear();
@@ -146,11 +162,24 @@ namespace Assets.Gameplay.Manager
 
         public void StartRun()
         {
-            if (_selectedTileCoord.HasValue){
-                _grid.GetTile(_selectedTileCoord.Value).SetSelected(false);
-                _selectedTileCoord = null;
+            if (_currentPlay == null)
+            {
+                if (_selectedTileCoord.HasValue)
+                {
+                    _grid.GetTile(_selectedTileCoord.Value).SetSelected(false);
+                    _selectedTileCoord = null;
+                }
+                _cleanLevelCopy = JsonUtility.ToJson(serializeCurrentLevel());
+
+                _currentPlay = new SingleGameRun(this);
+
+                _runButtonText.text = "Quit play";
+            } else {
+                _currentPlay = null;
+                var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
+                loadLevelData(cleanLevel);
+                _runButtonText.text = "Play";
             }
-            _currentPlay = new SingleGameRun(this);
         }
     }
 }

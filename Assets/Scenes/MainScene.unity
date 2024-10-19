@@ -989,6 +989,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TilePrefab: {fileID: 5265387176146853900, guid: 9a4f3c65cd8cc144189773b478a969bc, type: 3}
+  _runButtonText: {fileID: 1779837068}
 --- !u!4 &1708159275
 Transform:
   m_ObjectHideFlags: 0
