@@ -1,13 +1,7 @@
 ﻿using Assets.Common.Scripts;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -106,10 +100,19 @@ namespace Assets.Gameplay.Manager
         public void SaveLevel()
         {
             if (_currentPlay != null) return;
-            var path = EditorUtility.SaveFilePanel("SaveLevel", "C:/levels", "level", "json");
-            if (string.IsNullOrEmpty(path)) return;
-            LevelData data = serializeCurrentLevel();
-            File.WriteAllText(path, JsonUtility.ToJson(data));
+            
+            SimpleFileBrowser.FileBrowser.ShowSaveDialog(
+                (path) => {
+                    LevelData data = serializeCurrentLevel();
+                    File.WriteAllText(path[0], JsonUtility.ToJson(data));
+                },
+                onCancel: null,
+                pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
+                allowMultiSelection: false,
+                initialPath: Application.dataPath,
+                initialFilename:"level.json",
+                title:"Select File", saveButtonText:"Save");
+
         }
 
         private LevelData serializeCurrentLevel()
@@ -130,11 +133,20 @@ namespace Assets.Gameplay.Manager
         public void LoadLevel()
         {
             if (_currentPlay != null) return;
-            var path = EditorUtility.OpenFilePanel("SaveLevel", "C:/levels", "json");
-            if (string.IsNullOrEmpty(path)) return;
-            var fileText = File.ReadAllText(path);
-            var data = JsonUtility.FromJson<LevelData>(fileText);
-            loadLevelData(data);
+
+            SimpleFileBrowser.FileBrowser.ShowLoadDialog(
+               (path) => {
+                   var fileText = File.ReadAllText(path[0]);
+                   var data = JsonUtility.FromJson<LevelData>(fileText);
+                   loadLevelData(data);
+               },
+               onCancel: null,
+               pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
+               allowMultiSelection: false,
+               initialPath: Application.dataPath,
+               initialFilename: "level.json",
+               title: "Select File", loadButtonText: "Select");
+           
         }
 
         private void loadLevelData(LevelData data)
