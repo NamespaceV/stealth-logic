@@ -81,7 +81,7 @@ namespace Assets.Gameplay.Manager
             var data = new LevelData();
             data.Size = _grid.GetSize();
             for (var x = 0; x < data.Size.x; ++x){
-                data.Tiles.Add(new List<TileData>());
+                data.Tiles.Add(new ListWrapper<TileData>());
                 for (var y = 0; y < data.Size.y; ++y)
                 {
                     data.Tiles[x].Add(_grid.GetTile(new Vector2Int(x, y)).ToData());

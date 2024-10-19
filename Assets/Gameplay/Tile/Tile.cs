@@ -29,7 +29,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _coord = tile_coord;
         name = $"Tile_{_coord.x}_{_coord.y}";
         for (int i = 0;i < Walls.Count; i++) {
-            _walls.Add(false);
+            _walls.Add(true);
         }
     }
 
