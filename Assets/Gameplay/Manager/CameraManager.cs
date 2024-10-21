@@ -55,10 +55,10 @@ public class CameraManager : MonoBehaviour
             directionDegrees = 90;
             angleDegrees = 45;
 
-        } else{
+        } else {
             // editor
             Camera.main.orthographic = true;
-            transform.position = new Vector3(transform.position.x, transform.position.y, -10);
+            transform.position = new Vector3(5, 4.5f, -10);
             transform.rotation = Quaternion.identity;
         }
     }

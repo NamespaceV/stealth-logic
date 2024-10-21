@@ -34,6 +34,10 @@ namespace Assets.Gameplay.Manager
 
         public void Init()
         {
+            _gameEnded = false;
+            _enemies.Clear();
+            _playerCoords = null;
+
             foreach (var tile in _mgr.GetGrid())
             {
                 if (tile.GetTileType() == TileType.HERO)

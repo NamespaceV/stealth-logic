@@ -27,6 +27,8 @@ namespace Assets.Gameplay.Manager
         [SerializeField] private TMP_Text _runButtonText;
         private string _cleanLevelCopy;
 
+        private string LevelsPath => Application.dataPath + "../Levels";
+
         private void Awake()
         {
             Instance = this;
@@ -154,7 +156,7 @@ namespace Assets.Gameplay.Manager
                 onCancel: null,
                 pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
                 allowMultiSelection: false,
-                initialPath: Application.dataPath,
+                initialPath: LevelsPath,
                 initialFilename:"level.json",
                 title:"Select File", saveButtonText:"Save");
 
@@ -189,7 +191,7 @@ namespace Assets.Gameplay.Manager
                onCancel: null,
                pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
                allowMultiSelection: false,
-               initialPath: Application.dataPath,
+               initialPath: LevelsPath,
                initialFilename: "level.json",
                title: "Select File", loadButtonText: "Select");
            
