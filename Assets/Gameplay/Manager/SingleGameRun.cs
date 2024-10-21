@@ -310,6 +310,11 @@ namespace Assets.Gameplay.Manager
                 tile = _mgr.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
                 if (tile?.GetTileType() == TileType.HERO)
                 {
+                    if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
+                    {
+                        // keep previous player seenm this turn as they ware closer
+                        continue;
+                    }
                     _lastSeenPursueActive = true;
                     _lastSeenInCurrentTurn = true;
                     _lastSeenDirection = d;
