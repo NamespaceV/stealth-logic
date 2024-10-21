@@ -9,16 +9,22 @@ public class CameraManager : MonoBehaviour
 
     private GameManager _gameManager;
 
-    public float rotationSpeed;
     private Vector3 lookTarget;
+
     public float cameraDistance;
-    public float angle;
     public float minZoom;
     public float maxZoom;
     public float zoomSpeed;
-    private float currentRotation = 0f;
-    public float minAngle = -80f;
-    public float maxAngle = 80f;
+
+    public float angleDegrees;
+    public float minAngle = 15;
+    public float maxAngle = 85f;
+
+    public float directionDegrees = 0f;
+
+    public float rotationSpeed;
+
+    private bool wasInPlayMode;
 
     private void Start()
     {
@@ -27,56 +33,75 @@ public class CameraManager : MonoBehaviour
 
     void Update()
     {
+        if (_gameManager.isPlaying != wasInPlayMode)
+        {
+            CameraTypeChanged(_gameManager.isPlaying);
+        }
         if(_gameManager.isPlaying)
         {
             HandleInGameCamera();
         }
         else
         {
-            var currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-            if (Input.GetMouseButton(2))
-            {
-                var delta = currentMousePosition - _lastMousePosition;
-                transform.position -= delta;
-                currentMousePosition -= delta;
-            }
-
-            _lastMousePosition = currentMousePosition;
+            HandleEditorCamera();
         }
+    }
+
+    private void CameraTypeChanged(bool isPlayMode)
+    {
+        wasInPlayMode= isPlayMode;
+        if (isPlayMode) {
+            Camera.main.orthographic = false;
+            directionDegrees = 90;
+            angleDegrees = 45;
+
+        } else{
+            // editor
+            Camera.main.orthographic = true;
+            transform.position = new Vector3(transform.position.x, transform.position.y, -10);
+            transform.rotation = Quaternion.identity;
+        }
+    }
+
+    private void HandleEditorCamera()
+    {
+        var currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        if (Input.GetMouseButton(2))
+        {
+            var delta = currentMousePosition - _lastMousePosition;
+            transform.position -= delta;
+            currentMousePosition -= delta;
+            //Debug.Log($"Move = {delta} = {currentMousePosition} - {_lastMousePosition} Mouse {Input.mousePosition}");
+        }
+
+        _lastMousePosition = currentMousePosition;
     }
 
     private void HandleInGameCamera()
     {
-        lookTarget = new Vector3(_gameManager.mapWidth / 2, 0, _gameManager.mapHeight / 2);
 
+        // Rotate camera (right mouse button)
         if (Input.GetMouseButton(1))
         {
             float deltaX = Input.GetAxis("Mouse X");
-            currentRotation -= deltaX * rotationSpeed;
-        }
-        if (Input.GetMouseButton(0))
-        {
+            directionDegrees -= deltaX * rotationSpeed;
             float deltaY = Input.GetAxis("Mouse Y");
-            angle -= deltaY * rotationSpeed;
-            angle = Mathf.Clamp(angle, minAngle, maxAngle);
+            angleDegrees -= deltaY * rotationSpeed;
+            angleDegrees = Mathf.Clamp(angleDegrees, minAngle, maxAngle);
         }
 
-        float radianAngle = currentRotation * Mathf.Deg2Rad;
-        float x = Mathf.Sin(radianAngle) * cameraDistance;
-        float z = Mathf.Cos(radianAngle) * cameraDistance;
-        float y = Mathf.Sin(angle * Mathf.Deg2Rad) * cameraDistance;
-
-        transform.position = lookTarget + new Vector3(x, y, z);
-
+        // Zoom  (middle)
         float scrollInput = Input.GetAxis("Mouse ScrollWheel");
         if (scrollInput != 0)
         {
             cameraDistance += scrollInput * zoomSpeed;
             cameraDistance = Mathf.Clamp(cameraDistance, minZoom, maxZoom);
-            transform.position = lookTarget + new Vector3(x, y, z);
         }
 
+        var rotation = Quaternion.Euler(0, directionDegrees, angleDegrees);
+        lookTarget = new Vector3(_gameManager.mapWidth / 2, 0, _gameManager.mapHeight / 2);
+        transform.position = lookTarget + rotation * new Vector3(cameraDistance, 0,0);
         transform.LookAt(lookTarget);
     }
 
