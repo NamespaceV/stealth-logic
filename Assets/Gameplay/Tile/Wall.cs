@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Wall : MonoBehaviour, IInteractable
 {
-    public bool isExit;
+    public bool isExit { get; private set; }
     private GameManager _gameManager;
 
     private Color _defaultColor;
@@ -24,6 +24,12 @@ public class Wall : MonoBehaviour, IInteractable
     private void Start()
     {
         _gameManager = GameManager.Instance;
+    }
+
+    public void SetExit(bool exit){
+        if (exit != isExit){
+            ToggleExit();
+        }
     }
 
     public void ToggleExit()

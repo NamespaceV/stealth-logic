@@ -23,6 +23,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     [SerializeField] private List<Wall> Walls;
     private List<bool> _walls = new List<bool>(4);
+    private List<bool> _exits = new List<bool>(4);
     private GameManager _mgr;
     private Vector2Int _coord;
     public Vector3 Pos;
@@ -34,12 +35,39 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _coord = tile_coord;
         name = $"Tile_{_coord.x}_{_coord.y}";
         for (int i = 0;i < Walls.Count; i++) {
-            _walls.Add(true);
             Interactables[(Direction)i] = Walls[i];
         }
 
+        if (_walls.Count != 4) { _walls = new List<bool> { true, true, true, true }; }
+        if (_exits.Count != 4) { _exits = new List<bool> { false, false, false, false }; }
+
+        Debug.Assert(_walls.Count == 4, $"{this} invalid wall count = {_walls.Count}");
+        Debug.Assert(_exits.Count == 4, $"{this} invalid exits count = {_exits.Count}");
+
         Pos = new(_coord.x, 0, _coord.y);
     }
+
+    public void ReadFromData(TileData tileData)
+    {
+        SetTileType(tileData.Type);
+        _walls = new List<bool>(tileData.Walls);
+        _exits = new List<bool>(tileData.Exits);
+        for (int i = 0; i < 4; ++i)
+        {
+            Walls[i].gameObject.SetActive(_walls[i]);
+            Walls[i].SetExit(tileData.Exits[i]);
+        }
+    }
+
+    public TileData ToData()
+    {
+        var result = new TileData();
+        result.Type = _type;
+        result.Walls = new List<bool>(_walls);
+        result.Exits = new List<bool>(_exits);
+        return result;
+    }
+
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -78,23 +106,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         return _type;
     }
 
-    public TileData ToData()
-    {
-        var result = new TileData();
-        result.Type = _type;
-        result.Walls = new List<bool>(_walls);
-        return result;
-    }
-
-    public void ReadFromData(TileData tileData)
-    {
-        SetTileType(tileData.Type);
-        _walls = new List<bool>(tileData.Walls);
-        for (int i = 0; i < 4; ++i){
-            Walls[i].gameObject.SetActive(_walls[i]);
-        }
-    }
-
     public void TryInteract(Direction direction)
     {
         if (Interactables.ContainsKey(direction)) Interactables[direction].Interact();
@@ -122,5 +133,12 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         currentObject.transform.position = targetTile.Pos;
         targetTile.currentObject = currentObject;
         currentObject = null;
+    }
+
+    internal void ToggleExit(Direction dir)
+    {
+        GetWall(dir).ToggleExit();
+        _exits[(int)dir] = GetWall(dir).isExit;
+
     }
 }

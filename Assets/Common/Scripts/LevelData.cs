@@ -9,6 +9,20 @@ namespace Assets.Common.Scripts
     {
         public Vector2Int Size;
         public List<ListWrapper<TileData>> Tiles = new List<ListWrapper<TileData>>();
+
+        public void Migrate()
+        {
+            for (int x = 0; x < Size.x; ++x)
+            {
+                for (int y = 0; y < Size.y; ++y)
+                {
+                    var tile = Tiles[x][y];
+                    if (tile.Exits == null || tile.Exits.Count != 4) {
+                        tile.Exits = new List<bool>{ false, false, false, false };
+                    }
+                }
+            }
+        }
     }
 
     [Serializable]
@@ -16,6 +30,7 @@ namespace Assets.Common.Scripts
     {
         public TileType Type;
         public List<bool> Walls;
+        public List<bool> Exits;
     }
 
     // Unity cant serialize List<List<>> :/

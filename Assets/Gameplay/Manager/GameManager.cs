@@ -118,7 +118,7 @@ namespace Assets.Gameplay.Manager
             {
                 if (_placingExit && _grid.GetTile(_selectedTileCoord.Value).CheckWall(dir.Value))
                 {
-                    _grid.GetTile(_selectedTileCoord.Value).GetWall(dir.Value).ToggleExit();
+                    _grid.GetTile(_selectedTileCoord.Value).ToggleExit(dir.Value);
                     _placingExit = false;
                 }
                 else
@@ -216,6 +216,8 @@ namespace Assets.Gameplay.Manager
 
         private void loadLevelData(LevelData data)
         {
+            data.Migrate();
+
             _selectedTileCoord = null;
             ClearGrid();
 
