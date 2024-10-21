@@ -30,6 +30,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private TileType _type;
     private int _heroCount;
     public GameObject currentObject;
+    [SerializeField] private bool _selected;
+    [SerializeField] private GameObject _floor3d;
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
         _mgr = manager;
@@ -94,7 +96,13 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     public void SetSelected(bool val)
     {
+        _selected = val;
         Background.color = val ? Color.red : Color.white;
+        if (_floor3d != null)
+        {
+            var selection = _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive:true)?.gameObject;
+            selection?.SetActive(_selected);
+        }
     }
 
     public void SetTileType(TileType type)
@@ -151,5 +159,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         GetWall(dir).ToggleExit();
         _exits[(int)dir] = GetWall(dir).isExit;
 
+    }
+
+    public void SetFloor3D(GameObject floor3d)
+    {
+        _floor3d = floor3d;
+        _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive: true)?.gameObject.SetActive(_selected);
     }
 }

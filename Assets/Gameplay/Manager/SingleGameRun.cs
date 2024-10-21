@@ -43,6 +43,7 @@ namespace Assets.Gameplay.Manager
             _gameEnded = false;
             _enemies.Clear();
             _playerCoords.Clear();
+            _selectedPlayerIdx = 0;
 
             foreach (var tile in _mgr.GetGrid())
             {
@@ -56,10 +57,16 @@ namespace Assets.Gameplay.Manager
                 }
             }
 
-            _mgr.GetGrid().GetTile(_playerCoords[0]).SetSelected(true);
-
             GenerateMap();
             HideEditorMap();
+
+            if (_playerCoords.Count == 0) {
+                _gameEnded = true;
+                _hud.SetMainMessage("NO PLAYER ON THE LEVEL");
+                return;
+            }
+
+            _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(true);
         }
 
         internal void Quit()
@@ -103,6 +110,7 @@ namespace Assets.Gameplay.Manager
                 {
                     GameObject floor = Instantiate(FloorTilePrefab, new Vector3(x, 0, y), Quaternion.identity);
                     floor.transform.SetParent(LevelParent.transform);
+                    grid.GetTile(new Vector2Int(x, y)).SetFloor3D(floor);
                 }
             }
 
