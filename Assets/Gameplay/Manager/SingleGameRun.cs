@@ -1,11 +1,12 @@
 ﻿using Assets.Common.Scripts;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Assets.Gameplay.Manager
 {
-    public class SingleGameRun
+    public class SingleGameRun : MonoBehaviour
     {
         private GameManager _mgr;
 
@@ -14,10 +15,20 @@ namespace Assets.Gameplay.Manager
         private Vector2Int? _playerCoords;
         private List<EnemyState> _enemies = new List<EnemyState>();
 
-        public SingleGameRun(GameManager manager)
-        {
-            _mgr = manager;
+        [Header("Map")]
+        [SerializeField] private GameObject LevelParent;
+        [SerializeField] private GameObject FloorTilePrefab;
+        [SerializeField] private GameObject WallTilePrefab;
+        [SerializeField] private GameObject PlayerPrefab;
+        [SerializeField] private GameObject EnemyPrefab;
 
+        private void Start()
+        {
+            _mgr = GameManager.Instance;
+        }
+
+        public void Init()
+        {
             foreach (var tile in _mgr.GetGrid())
             {
                 if (tile.GetTileType() == TileType.HERO)
@@ -34,6 +45,61 @@ namespace Assets.Gameplay.Manager
                 }
             }
             _mgr.GetGrid().GetTile(_playerCoords.Value).SetSelected(true);
+            GenerateMap();
+        }
+
+        private void GenerateMap()
+        {
+            foreach(Transform child in LevelParent.transform) Destroy(child.gameObject);
+
+            var grid = _mgr.GetGrid();
+
+            for (int y = 0; y < _mgr.mapHeight; y++)
+            {
+                for (int x = 0; x < _mgr.mapWidth; x++)
+                {
+                    GameObject floor = Instantiate(FloorTilePrefab, new Vector3(x, 0, y), Quaternion.identity);
+                    floor.transform.SetParent(LevelParent.transform);
+                }
+            }
+
+            foreach (var tile in grid)
+            {
+                if(tile.CheckWall(Direction.Up))
+                {
+                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.identity);
+                    wall.transform.SetParent(LevelParent.transform);
+                }
+                if (tile.CheckWall(Direction.Down))
+                {
+                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0,180,0)));
+                    wall.transform.SetParent(LevelParent.transform);
+                }
+                if (tile.CheckWall(Direction.Left))
+                {
+                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, -90, 0)));
+                    wall.transform.SetParent(LevelParent.transform);
+                }
+                if (tile.CheckWall(Direction.Right))
+                {
+                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 90, 0)));
+                    wall.transform.SetParent(LevelParent.transform);
+                }
+
+                switch (tile.GetTileType())
+                {
+                    case TileType.EMPTY:
+                        break;
+                    case TileType.ENEMY:
+                        GameObject enemy = Instantiate(EnemyPrefab, tile.Pos, Quaternion.identity);
+                        enemy.transform.SetParent(LevelParent.transform);
+                        break;
+                    case TileType.HERO:
+                        GameObject player = Instantiate(PlayerPrefab, tile.Pos, Quaternion.identity);
+                        player.transform.SetParent(LevelParent.transform);
+                        break;
+                }
+            }
         }
 
         public void MakeMove(Direction? dir)
@@ -43,20 +109,24 @@ namespace Assets.Gameplay.Manager
 
             var g = _mgr.GetGrid();
             var playerTile = g.GetTile(_playerCoords.Value);
-            var adjacentTile = g.GetAdjacentTile(_playerCoords.Value, dir.Value);
+            var targetTile = g.GetAdjacentTile(_playerCoords.Value, dir.Value);
 
-            if (adjacentTile?.GetTileType() == TileType.EMPTY
+            if (targetTile?.GetTileType() == TileType.EMPTY
                     && playerTile.AllowsMove(dir.Value))
             {
+                if (targetTile.OnTileInteractable != null) targetTile.OnTileInteractable.Interact();
                 playerTile.SetTileType(TileType.EMPTY);
                 playerTile.SetSelected(false);
-                adjacentTile.SetTileType(TileType.HERO);
-                adjacentTile.SetSelected(true);
-                _playerCoords = adjacentTile.GetCoords();
+                targetTile.SetTileType(TileType.HERO);
+                targetTile.SetSelected(true);
+                _playerCoords = targetTile.GetCoords();
 
                 moveEnemies();
             }
-
+            else
+            {
+                playerTile.TryInteract(dir.Value);
+            }
         }
 
         private void moveEnemies()
@@ -75,9 +145,9 @@ namespace Assets.Gameplay.Manager
         {
             _gameEnded = true;
         }
-    }
+        }
 
-    public class EnemyState
+        public class EnemyState
     {
         private GameManager _mgr;
         private SingleGameRun _currentRun;

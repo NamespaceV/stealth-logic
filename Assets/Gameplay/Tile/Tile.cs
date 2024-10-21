@@ -18,10 +18,14 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     [SerializeField] private GameObject PlayerVisualisation;
     [SerializeField] private GameObject EnemyVisualisation;
 
+    public IInteractable OnTileInteractable;
+    public Dictionary<Direction, IInteractable> Interactables = new();
+
     [SerializeField] private List<GameObject> Walls;
     private List<bool> _walls = new List<bool>(4);
     private GameManager _mgr;
     private Vector2Int _coord;
+    public Vector3 Pos;
     private TileType _type;
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
@@ -31,6 +35,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         for (int i = 0;i < Walls.Count; i++) {
             _walls.Add(true);
         }
+
+        Pos = new(_coord.x, 0, _coord.y);
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -78,13 +84,20 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    public void TryInteract(Direction direction)
+    {
+        if (Interactables.ContainsKey(direction)) Interactables[direction].Interact();
+    }
+
     public Vector2Int GetCoords()
     {
         return _coord;
     }
 
+    public bool CheckWall(Direction dir) => _walls[(int)dir];
+
     public bool AllowsMove(Direction dir)
     {
-        return !_walls[(int)dir];
+        return !CheckWall(dir);
     }
 }

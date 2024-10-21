@@ -8,22 +8,35 @@ using UnityEngine.InputSystem;
 
 namespace Assets.Gameplay.Manager
 {
+    [RequireComponent(typeof(SingleGameRun))]
     public class GameManager :  MonoBehaviour
     {
+        public static GameManager Instance;
+
+        public int mapWidth = 10;
+        public int mapHeight = 10;
+
         public GameObject TilePrefab;
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
-        private SingleGameRun _currentPlay;
+        public bool isPlaying { get; private set; }
+        private SingleGameRun _singleGameRun;
 
         [SerializeField] private TMP_Text _runButtonText;
         private string _cleanLevelCopy;
 
+        private void Awake()
+        {
+            Instance = this;
+            _singleGameRun = GetComponent<SingleGameRun>();
+        }
+
         public void Start()
         {
-            for (int x = 0; x < 10; ++x)
+            for (int x = 0; x < mapWidth; ++x)
             {
-                for (int y = 0; y < 10; ++y) {
+                for (int y = 0; y < mapHeight; ++y) {
                     var coord = new Vector2Int(x, y);
                     var go = Instantiate(TilePrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
                     var tile = go.GetComponent<Tile>();
@@ -38,9 +51,9 @@ namespace Assets.Gameplay.Manager
         public void TileClicked(Vector2Int coord, PointerEventData.InputButton button)
         {
 
-            if (_currentPlay != null)
+            if (isPlaying)
             {
-                _currentPlay.HandleClick(coord, button);
+                _singleGameRun.HandleClick(coord, button);
                 return;
             }
 
@@ -69,9 +82,9 @@ namespace Assets.Gameplay.Manager
             var dir = InputToDirection(input);
             if (dir == null){ return; }
 
-            if (_currentPlay != null)
+            if (isPlaying)
             {
-                _currentPlay.MakeMove(dir);
+                _singleGameRun.MakeMove(dir);
                 return;
             }
             // EDITOR
@@ -99,7 +112,7 @@ namespace Assets.Gameplay.Manager
 
         public void SaveLevel()
         {
-            if (_currentPlay != null) return;
+            if (isPlaying) return;
             
             SimpleFileBrowser.FileBrowser.ShowSaveDialog(
                 (path) => {
@@ -132,7 +145,7 @@ namespace Assets.Gameplay.Manager
 
         public void LoadLevel()
         {
-            if (_currentPlay != null) return;
+            if (isPlaying) return;
 
             SimpleFileBrowser.FileBrowser.ShowLoadDialog(
                (path) => {
@@ -149,14 +162,19 @@ namespace Assets.Gameplay.Manager
            
         }
 
-        private void loadLevelData(LevelData data)
+        private void ClearGrid()
         {
-            _selectedTileCoord = null;
             foreach (var f in _grid)
             {
                 Destroy(f.gameObject);
             }
             _grid.Clear();
+        }
+
+        private void loadLevelData(LevelData data)
+        {
+            _selectedTileCoord = null;
+            ClearGrid();        
 
             for (int x = 0; x < data.Size.x; ++x)
             {
@@ -174,7 +192,7 @@ namespace Assets.Gameplay.Manager
 
         public void StartRun()
         {
-            if (_currentPlay == null)
+            if (!isPlaying)
             {
                 if (_selectedTileCoord.HasValue)
                 {
@@ -183,11 +201,14 @@ namespace Assets.Gameplay.Manager
                 }
                 _cleanLevelCopy = JsonUtility.ToJson(serializeCurrentLevel());
 
-                _currentPlay = new SingleGameRun(this);
+                isPlaying = true;
+                _singleGameRun.Init();
+
+                ClearGrid();
 
                 _runButtonText.text = "Quit play";
             } else {
-                _currentPlay = null;
+                isPlaying = false;
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
                 loadLevelData(cleanLevel);
                 _runButtonText.text = "Play";
