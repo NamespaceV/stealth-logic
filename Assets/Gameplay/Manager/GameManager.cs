@@ -20,6 +20,7 @@ namespace Assets.Gameplay.Manager
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
+        private bool _placingExit;
         public bool isPlaying { get; private set; }
         private SingleGameRun _singleGameRun;
 
@@ -43,6 +44,14 @@ namespace Assets.Gameplay.Manager
                     tile.Register(this, coord);
                     _grid.SetTile(coord, tile);
                 }
+            }
+        }
+
+        private void Update()
+        {
+            if(!isPlaying)
+            {
+                if (Input.GetKeyDown(KeyCode.E)) _placingExit = !_placingExit;
             }
         }
 
@@ -90,7 +99,15 @@ namespace Assets.Gameplay.Manager
             // EDITOR
             if (_selectedTileCoord != null)
             {
-                toggleWall(_selectedTileCoord.Value, dir.Value);
+                if (_placingExit && _grid.GetTile(_selectedTileCoord.Value).CheckWall(dir.Value))
+                {
+                    _grid.GetTile(_selectedTileCoord.Value).GetWall(dir.Value).ToggleExit();
+                    _placingExit = false;
+                }
+                else
+                {
+                    toggleWall(_selectedTileCoord.Value, dir.Value);
+                }
             }
         }
 
@@ -171,6 +188,14 @@ namespace Assets.Gameplay.Manager
             _grid.Clear();
         }
 
+        private void HideGrid()
+        {
+            foreach (var f in _grid)
+            {
+                f.gameObject.SetActive(false);
+            }
+        }
+
         private void loadLevelData(LevelData data)
         {
             _selectedTileCoord = null;
@@ -204,7 +229,7 @@ namespace Assets.Gameplay.Manager
                 isPlaying = true;
                 _singleGameRun.Init();
 
-                ClearGrid();
+                HideGrid();
 
                 _runButtonText.text = "Quit play";
             } else {

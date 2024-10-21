@@ -1,6 +1,7 @@
 ﻿using Assets.Common.Scripts;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -21,6 +22,9 @@ namespace Assets.Gameplay.Manager
         [SerializeField] private GameObject WallTilePrefab;
         [SerializeField] private GameObject PlayerPrefab;
         [SerializeField] private GameObject EnemyPrefab;
+        [SerializeField] private Sprite ExitSprite;
+
+        private GameObject player;
 
         private void Start()
         {
@@ -65,26 +69,7 @@ namespace Assets.Gameplay.Manager
 
             foreach (var tile in grid)
             {
-                if(tile.CheckWall(Direction.Up))
-                {
-                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.identity);
-                    wall.transform.SetParent(LevelParent.transform);
-                }
-                if (tile.CheckWall(Direction.Down))
-                {
-                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0,180,0)));
-                    wall.transform.SetParent(LevelParent.transform);
-                }
-                if (tile.CheckWall(Direction.Left))
-                {
-                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, -90, 0)));
-                    wall.transform.SetParent(LevelParent.transform);
-                }
-                if (tile.CheckWall(Direction.Right))
-                {
-                    GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 90, 0)));
-                    wall.transform.SetParent(LevelParent.transform);
-                }
+               ProcessWalls(tile);
 
                 switch (tile.GetTileType())
                 {
@@ -93,12 +78,46 @@ namespace Assets.Gameplay.Manager
                     case TileType.ENEMY:
                         GameObject enemy = Instantiate(EnemyPrefab, tile.Pos, Quaternion.identity);
                         enemy.transform.SetParent(LevelParent.transform);
+                        tile.currentObject = enemy;
                         break;
                     case TileType.HERO:
                         GameObject player = Instantiate(PlayerPrefab, tile.Pos, Quaternion.identity);
                         player.transform.SetParent(LevelParent.transform);
+                        tile.currentObject = player;
                         break;
                 }
+            }
+        }
+
+        private void ProcessWalls(Tile tile)
+        {
+            if (tile.CheckWall(Direction.Up))
+            {
+                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.identity);
+                if (tile.GetWall(Direction.Up).isExit)
+                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
+                wall.transform.SetParent(LevelParent.transform);
+            }
+            if (tile.CheckWall(Direction.Down))
+            {
+                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 180, 0)));
+                if (tile.GetWall(Direction.Down).isExit) 
+                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
+                wall.transform.SetParent(LevelParent.transform);
+            }
+            if (tile.CheckWall(Direction.Left))
+            {
+                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, -90, 0)));
+                if (tile.GetWall(Direction.Left).isExit) 
+                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
+                wall.transform.SetParent(LevelParent.transform);
+            }
+            if (tile.CheckWall(Direction.Right))
+            {
+                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 90, 0)));
+                if (tile.GetWall(Direction.Right).isExit) 
+                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
+                wall.transform.SetParent(LevelParent.transform);
             }
         }
 
@@ -116,16 +135,16 @@ namespace Assets.Gameplay.Manager
             {
                 if (targetTile.OnTileInteractable != null) targetTile.OnTileInteractable.Interact();
                 playerTile.SetTileType(TileType.EMPTY);
+                playerTile.MoveObjectToTile(targetTile);
                 playerTile.SetSelected(false);
                 targetTile.SetTileType(TileType.HERO);
                 targetTile.SetSelected(true);
-                _playerCoords = targetTile.GetCoords();
-
+                _playerCoords = targetTile.GetCoords();             
                 moveEnemies();
             }
             else
             {
-                playerTile.TryInteract(dir.Value);
+                if(dir != null && playerTile != null) playerTile.TryInteract(dir.Value);
             }
         }
 
@@ -226,6 +245,7 @@ namespace Assets.Gameplay.Manager
         private void moveTo(Tile adjacent)
         {
             _myTile.SetTileType(TileType.EMPTY);
+            _myTile.MoveObjectToTile(adjacent);
             adjacent.SetTileType(TileType.ENEMY);
             _coord = adjacent.GetCoords();
         }

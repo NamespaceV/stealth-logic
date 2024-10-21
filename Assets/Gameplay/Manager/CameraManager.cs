@@ -33,36 +33,28 @@ public class CameraManager : MonoBehaviour
         }
         else
         {
-            HandleEditorCamera();
+            var currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            if (Input.GetMouseButton(2))
+            {
+                var delta = currentMousePosition - _lastMousePosition;
+                transform.position -= delta;
+                currentMousePosition -= delta;
+            }
+
+            _lastMousePosition = currentMousePosition;
         }
-    }
-
-    private void HandleEditorCamera()
-    {
-        var currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        if (Input.GetMouseButton(2))
-        {
-            var delta = currentMousePosition - _lastMousePosition;
-            transform.position -= delta;
-            currentMousePosition -= delta;
-        }
-
-        _lastMousePosition = currentMousePosition;
     }
 
     private void HandleInGameCamera()
     {
         lookTarget = new Vector3(_gameManager.mapWidth / 2, 0, _gameManager.mapHeight / 2);
 
-        // Horizontal rotation (right mouse button)
         if (Input.GetMouseButton(1))
         {
             float deltaX = Input.GetAxis("Mouse X");
             currentRotation -= deltaX * rotationSpeed;
         }
-
-        // Vertical rotation (left mouse button)
         if (Input.GetMouseButton(0))
         {
             float deltaY = Input.GetAxis("Mouse Y");
@@ -70,7 +62,6 @@ public class CameraManager : MonoBehaviour
             angle = Mathf.Clamp(angle, minAngle, maxAngle);
         }
 
-        // Calculate camera position
         float radianAngle = currentRotation * Mathf.Deg2Rad;
         float x = Mathf.Sin(radianAngle) * cameraDistance;
         float z = Mathf.Cos(radianAngle) * cameraDistance;
@@ -78,7 +69,6 @@ public class CameraManager : MonoBehaviour
 
         transform.position = lookTarget + new Vector3(x, y, z);
 
-        // Zoom functionality
         float scrollInput = Input.GetAxis("Mouse ScrollWheel");
         if (scrollInput != 0)
         {
@@ -87,7 +77,6 @@ public class CameraManager : MonoBehaviour
             transform.position = lookTarget + new Vector3(x, y, z);
         }
 
-        // Make the camera look at the target
         transform.LookAt(lookTarget);
     }
 

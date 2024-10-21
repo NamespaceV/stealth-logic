@@ -21,12 +21,13 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public IInteractable OnTileInteractable;
     public Dictionary<Direction, IInteractable> Interactables = new();
 
-    [SerializeField] private List<GameObject> Walls;
+    [SerializeField] private List<Wall> Walls;
     private List<bool> _walls = new List<bool>(4);
     private GameManager _mgr;
     private Vector2Int _coord;
     public Vector3 Pos;
     private TileType _type;
+    public GameObject currentObject;
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
         _mgr = manager;
@@ -48,7 +49,16 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         var wallIdx = (int)dir;
         _walls[wallIdx] = !_walls[wallIdx];
-        Walls[wallIdx].SetActive(_walls[wallIdx]);
+        Walls[wallIdx].gameObject.SetActive(_walls[wallIdx]);
+
+        if (_walls[wallIdx])
+        {
+            Interactables[dir] = Walls[wallIdx];
+        }
+        else
+        {
+            Interactables[dir] = null;
+        }
     }
 
     public void SetSelected(bool val)
@@ -80,7 +90,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         SetTileType(tileData.Type);
         _walls = new List<bool>(tileData.Walls);
         for (int i = 0; i < 4; ++i){
-            Walls[i].SetActive(_walls[i]);
+            Walls[i].gameObject.SetActive(_walls[i]);
         }
     }
 
@@ -99,5 +109,17 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public bool AllowsMove(Direction dir)
     {
         return !CheckWall(dir);
+    }
+
+    public Wall GetWall(Direction dir)
+    {
+        return Walls[(int)dir];
+    }
+
+    public void MoveObjectToTile(Tile targetTile)
+    {
+        currentObject.transform.position = targetTile.Pos;
+        targetTile.currentObject = currentObject;
+        currentObject = null;
     }
 }
