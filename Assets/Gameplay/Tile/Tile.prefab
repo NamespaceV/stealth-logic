@@ -97,7 +97,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7065489ad0658704983d1fe714a8b01b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExit: 0
 --- !u!1 &710025916593279698
 GameObject:
   m_ObjectHideFlags: 0
@@ -228,7 +227,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7065489ad0658704983d1fe714a8b01b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExit: 0
 --- !u!1 &2227979406749464804
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,7 +324,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7065489ad0658704983d1fe714a8b01b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExit: 0
 --- !u!1 &2468983040111476222
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +350,7 @@ Transform:
   m_GameObject: {fileID: 2468983040111476222}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -400,8 +397,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: bda7e402a8177a34d8968fbb5d06d41c, type: 3}
-  m_Color: {r: 0.5660378, g: 0.5313279, b: 0.5313279, a: 1}
+  m_Sprite: {fileID: 1222745794, guid: 57b5326bd8ac6e34cb7264074f539290, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -437,7 +434,7 @@ Transform:
   m_GameObject: {fileID: 3605489292808053604}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -484,8 +481,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: bda7e402a8177a34d8968fbb5d06d41c, type: 3}
-  m_Color: {r: 0.8301887, g: 0.011747932, b: 0.011747932, a: 1}
+  m_Sprite: {fileID: -827938780, guid: 3bf8ffd8dce2dd04baa8b609bf21871d, type: 3}
+  m_Color: {r: 1, g: 0.638, b: 0.638, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -592,7 +589,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7065489ad0658704983d1fe714a8b01b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isExit: 0
 --- !u!1 &5265387176146853900
 GameObject:
   m_ObjectHideFlags: 0
@@ -778,3 +774,4 @@ MonoBehaviour:
   - {fileID: 4038545554673450729}
   - {fileID: 9060831116141217833}
   Pos: {x: 0, y: 0, z: 0}
+  currentObject: {fileID: 0}
