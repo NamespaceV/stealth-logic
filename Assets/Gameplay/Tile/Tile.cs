@@ -35,6 +35,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         name = $"Tile_{_coord.x}_{_coord.y}";
         for (int i = 0;i < Walls.Count; i++) {
             _walls.Add(true);
+            Interactables[(Direction)i] = Walls[i];
         }
 
         Pos = new(_coord.x, 0, _coord.y);
