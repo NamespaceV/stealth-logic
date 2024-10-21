@@ -40,11 +40,11 @@ public class Wall : MonoBehaviour, IInteractable
         else _spriteRenderer.color = _defaultColor;
     }
 
-    public void Interact()
+    public void Interact(SingleGameRun gameRun, Vector2Int coord)
     {
         if(isExit)
         {
-            Debug.Log("You escaped.");
+            gameRun.Escape(coord);
         }
     }
 }

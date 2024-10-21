@@ -14,7 +14,8 @@ namespace Assets.Gameplay.Manager
 
         private bool _gameEnded;
 
-        private Vector2Int? _playerCoords;
+        private List<Vector2Int> _playerCoords = new List<Vector2Int>();
+        private int _selectedPlayerIdx = 0;
         private List<EnemyState> _enemies = new List<EnemyState>();
 
         [Header("Map")]
@@ -25,58 +26,77 @@ namespace Assets.Gameplay.Manager
         [SerializeField] private GameObject EnemyPrefab;
         [SerializeField] private Sprite ExitSprite;
 
-        private GameObject player;
+        private HUD _hud;
 
         private void Start()
         {
             _mgr = GameManager.Instance;
         }
 
+        internal void SetHud(HUD hud)
+        {
+            _hud = hud;
+        }
+
         public void Init()
         {
             _gameEnded = false;
             _enemies.Clear();
-            _playerCoords = null;
+            _playerCoords.Clear();
 
             foreach (var tile in _mgr.GetGrid())
             {
                 if (tile.GetTileType() == TileType.HERO)
                 {
-                    if (_playerCoords != null)
-                    {
-                        Debug.LogWarning("Multiple Players not supported yet " + _playerCoords);
-                    }
-                    _playerCoords = tile.GetCoords();
+                    _playerCoords.Add(tile.GetCoords());
                 }
                 else if (tile.GetTileType() == TileType.ENEMY)
                 {
                     _enemies.Add(new EnemyState(_mgr, this, tile.GetCoords()));
                 }
             }
-            _mgr.GetGrid().GetTile(_playerCoords.Value).SetSelected(true);
+
+            _mgr.GetGrid().GetTile(_playerCoords[0]).SetSelected(true);
+
             GenerateMap();
+            HideEditorMap();
+        }
+
+        internal void Quit()
+        {
+            Clear3dMap();
+            ShowEditorMap();
+        }
+
+        private void HideEditorMap()
+        {
             foreach (var t in _mgr.GetGrid())
             {
                 t.gameObject.SetActive(false);
             }
         }
 
-
-        internal void Quit()
+        private void ShowEditorMap()
         {
-            foreach (Transform child in LevelParent.transform) Destroy(child.gameObject);
             foreach (var t in _mgr.GetGrid())
             {
                 t.gameObject.SetActive(true);
             }
         }
 
+        private void Clear3dMap() {
+            foreach (Transform child in LevelParent.transform)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+
         private void GenerateMap()
         {
-            foreach(Transform child in LevelParent.transform) Destroy(child.gameObject);
+            Clear3dMap();
 
             var grid = _mgr.GetGrid();
-
             for (int y = 0; y < _mgr.mapHeight; y++)
             {
                 for (int x = 0; x < _mgr.mapWidth; x++)
@@ -140,30 +160,46 @@ namespace Assets.Gameplay.Manager
             }
         }
 
+        public void ChangeSelection(bool deselect = true) {
+            if (deselect) {
+                _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(false);
+            }
+            _selectedPlayerIdx += 1;
+            _selectedPlayerIdx %= _playerCoords.Count;
+            _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(true);
+        }
+
         public void MakeMove(Direction? dir)
         {
             if (_gameEnded) return;
             if (dir == null) return;
 
             var g = _mgr.GetGrid();
-            var playerTile = g.GetTile(_playerCoords.Value);
-            var targetTile = g.GetAdjacentTile(_playerCoords.Value, dir.Value);
+            var playerCoords = _playerCoords[_selectedPlayerIdx];
+            var playerTile = g.GetTile(playerCoords);
+            var targetTile = g.GetAdjacentTile(playerCoords, dir.Value);
 
             if (targetTile?.GetTileType() == TileType.EMPTY
                     && playerTile.AllowsMove(dir.Value))
             {
-                if (targetTile.OnTileInteractable != null) targetTile.OnTileInteractable.Interact();
+                if (targetTile.OnTileInteractable != null)
+                {
+                    targetTile.OnTileInteractable.Interact(this, playerCoords);
+                }
                 playerTile.SetTileType(TileType.EMPTY);
                 playerTile.MoveObjectToTile(targetTile);
                 playerTile.SetSelected(false);
                 targetTile.SetTileType(TileType.HERO);
                 targetTile.SetSelected(true);
-                _playerCoords = targetTile.GetCoords();
+                _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
                 moveEnemies();
             }
             else
             {
-                if(dir != null && playerTile != null) playerTile.TryInteract(dir.Value);
+                if (dir != null && playerTile != null)
+                {
+                    playerTile.TryInteract(dir.Value, this);
+                }
             }
         }
 
@@ -182,10 +218,32 @@ namespace Assets.Gameplay.Manager
         public void PlayerLost()
         {
             _gameEnded = true;
+            _hud.SetMainMessage("YOU LOST");
+        }
+
+        public void Escape(Vector2Int coord)
+        {
+            if (_playerCoords.Contains(coord))
+            {
+                _playerCoords.Remove(coord);
+                var t = _mgr.GetGrid().GetTile(coord);
+                t.SetSelected(false);
+                t.SetTileType(TileType.EMPTY);
+                t.RemoveCurrentObject();
+            }
+            if (_playerCoords.Count == 0)
+            {
+                _gameEnded = true;
+                _hud.SetMainMessage("YOU WON");
+            }
+            else
+            {
+                ChangeSelection(false);
+            }
         }
     }
 
-        public class EnemyState
+    public class EnemyState
     {
         private GameManager _mgr;
         private SingleGameRun _currentRun;

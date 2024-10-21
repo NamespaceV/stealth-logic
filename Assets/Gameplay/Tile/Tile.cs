@@ -28,6 +28,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private Vector2Int _coord;
     public Vector3 Pos;
     private TileType _type;
+    private int _heroCount;
     public GameObject currentObject;
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
@@ -65,6 +66,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         result.Type = _type;
         result.Walls = new List<bool>(_walls);
         result.Exits = new List<bool>(_exits);
+        result.HeroCount = _heroCount;
         return result;
     }
 
@@ -106,9 +108,12 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         return _type;
     }
 
-    public void TryInteract(Direction direction)
+    public void TryInteract(Direction direction, SingleGameRun currentRun)
     {
-        if (Interactables.ContainsKey(direction)) Interactables[direction].Interact();
+        if (Interactables.ContainsKey(direction))
+        {
+            Interactables[direction].Interact(currentRun, _coord);
+        }
     }
 
     public Vector2Int GetCoords()
@@ -126,6 +131,12 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public Wall GetWall(Direction dir)
     {
         return Walls[(int)dir];
+    }
+
+    public void RemoveCurrentObject()
+    {
+        Destroy(currentObject.gameObject);
+        currentObject = null;
     }
 
     public void MoveObjectToTile(Tile targetTile)

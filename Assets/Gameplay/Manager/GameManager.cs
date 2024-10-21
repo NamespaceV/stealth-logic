@@ -24,7 +24,7 @@ namespace Assets.Gameplay.Manager
         public bool isPlaying { get; private set; }
         private SingleGameRun _singleGameRun;
 
-        [SerializeField] private TMP_Text _runButtonText;
+        [SerializeField] private HUD _hud;
         private string _cleanLevelCopy;
 
         private string LevelsPath => Application.dataPath + "../Levels";
@@ -33,6 +33,7 @@ namespace Assets.Gameplay.Manager
         {
             Instance = this;
             _singleGameRun = GetComponent<SingleGameRun>();
+            _singleGameRun.SetHud(_hud);
         }
 
         public void Start()
@@ -64,15 +65,24 @@ namespace Assets.Gameplay.Manager
             }
         }
 
-        private void Update()
-        {
-            if(!isPlaying)
-            {
-                if (Input.GetKeyDown(KeyCode.E)) _placingExit = !_placingExit;
-            }
-        }
 
         public Grid<Tile> GetGrid() { return _grid; }
+
+        private void Update()
+        {
+            if (!isPlaying)
+            {
+                if (Input.GetKeyDown(KeyCode.E))
+                {
+                    _placingExit = !_placingExit;
+                    _hud.SetSmallMessage(_placingExit ? "EXIT placement" : "");
+                }
+            }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.Tab)) _singleGameRun.ChangeSelection();
+            }
+        }
 
         public void TileClicked(Vector2Int coord, PointerEventData.InputButton button)
         {
@@ -247,17 +257,17 @@ namespace Assets.Gameplay.Manager
                 _cleanLevelCopy = JsonUtility.ToJson(serializeCurrentLevel());
 
                 isPlaying = true;
+                _hud.StartPlay();
                 _singleGameRun.Init();
 
                 HideGrid();
 
-                _runButtonText.text = "Quit play";
             } else {
                 isPlaying = false;
+                _hud.EndPlay();
                 _singleGameRun.Quit();
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
                 loadLevelData(cleanLevel);
-                _runButtonText.text = "Play";
             }
         }
     }
