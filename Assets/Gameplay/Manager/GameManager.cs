@@ -234,6 +234,7 @@ namespace Assets.Gameplay.Manager
                 _runButtonText.text = "Quit play";
             } else {
                 isPlaying = false;
+                _singleGameRun.Quit();
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
                 loadLevelData(cleanLevel);
                 _runButtonText.text = "Play";

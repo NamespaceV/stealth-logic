@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -50,6 +51,20 @@ namespace Assets.Gameplay.Manager
             }
             _mgr.GetGrid().GetTile(_playerCoords.Value).SetSelected(true);
             GenerateMap();
+            foreach (var t in _mgr.GetGrid())
+            {
+                t.gameObject.SetActive(false);
+            }
+        }
+
+
+        internal void Quit()
+        {
+            foreach (Transform child in LevelParent.transform) Destroy(child.gameObject);
+            foreach (var t in _mgr.GetGrid())
+            {
+                t.gameObject.SetActive(true);
+            }
         }
 
         private void GenerateMap()
@@ -139,7 +154,7 @@ namespace Assets.Gameplay.Manager
                 playerTile.SetSelected(false);
                 targetTile.SetTileType(TileType.HERO);
                 targetTile.SetSelected(true);
-                _playerCoords = targetTile.GetCoords();             
+                _playerCoords = targetTile.GetCoords();
                 moveEnemies();
             }
             else
@@ -164,7 +179,7 @@ namespace Assets.Gameplay.Manager
         {
             _gameEnded = true;
         }
-        }
+    }
 
         public class EnemyState
     {
