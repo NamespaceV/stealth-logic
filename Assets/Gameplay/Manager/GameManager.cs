@@ -35,9 +35,24 @@ namespace Assets.Gameplay.Manager
 
         public void Start()
         {
+            var lastLevelPath = PlayerPrefs.GetString("LastLevelOpened");
+            if (!string.IsNullOrEmpty(lastLevelPath)) {
+                var fileText = File.ReadAllText(lastLevelPath);
+                var data = JsonUtility.FromJson<LevelData>(fileText);
+                loadLevelData(data);
+            }
+            else
+            {
+                genEmptyMap10x10();
+            }
+        }
+
+        private void genEmptyMap10x10()
+        {
             for (int x = 0; x < mapWidth; ++x)
             {
-                for (int y = 0; y < mapHeight; ++y) {
+                for (int y = 0; y < mapHeight; ++y)
+                {
                     var coord = new Vector2Int(x, y);
                     var go = Instantiate(TilePrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
                     var tile = go.GetComponent<Tile>();
@@ -166,6 +181,7 @@ namespace Assets.Gameplay.Manager
 
             SimpleFileBrowser.FileBrowser.ShowLoadDialog(
                (path) => {
+                   PlayerPrefs.SetString("LastLevelOpened", path[0]);
                    var fileText = File.ReadAllText(path[0]);
                    var data = JsonUtility.FromJson<LevelData>(fileText);
                    loadLevelData(data);
@@ -199,7 +215,7 @@ namespace Assets.Gameplay.Manager
         private void loadLevelData(LevelData data)
         {
             _selectedTileCoord = null;
-            ClearGrid();        
+            ClearGrid();
 
             for (int x = 0; x < data.Size.x; ++x)
             {

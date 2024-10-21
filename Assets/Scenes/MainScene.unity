@@ -611,7 +611,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 5, y: 4.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -629,7 +629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e861143a86205144b99d1e2e088d2ba4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraDistance: 6.5
+  cameraDistance: 10.5
   minZoom: 2
   maxZoom: 12
   zoomSpeed: 5
