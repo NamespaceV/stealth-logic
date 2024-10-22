@@ -20,7 +20,6 @@ namespace Assets.Gameplay.Manager
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
-        private bool _placingExit;
         public bool isPlaying { get; private set; }
         private SingleGameRun _singleGameRun;
 
@@ -74,8 +73,7 @@ namespace Assets.Gameplay.Manager
             {
                 if (Input.GetKeyDown(KeyCode.E))
                 {
-                    _placingExit = !_placingExit;
-                    _hud.SetSmallMessage(_placingExit ? "EXIT placement" : "");
+                    _hud.SelectTool(_hud.GetSelectedTool() == ToolboxTool.EXIT ? ToolboxTool.WALL : ToolboxTool.EXIT);
                 }
             }
             else
@@ -126,14 +124,41 @@ namespace Assets.Gameplay.Manager
             // EDITOR
             if (_selectedTileCoord != null)
             {
-                if (_placingExit && _grid.GetTile(_selectedTileCoord.Value).CheckWall(dir.Value))
-                {
-                    _grid.GetTile(_selectedTileCoord.Value).ToggleExit(dir.Value);
-                    _placingExit = false;
-                }
-                else
-                {
-                    toggleWall(_selectedTileCoord.Value, dir.Value);
+                var tile = _grid.GetTile(_selectedTileCoord.Value);
+                switch (_hud.GetSelectedTool()) {
+                    case ToolboxTool.EXIT:
+                        if (tile.CheckWall(dir.Value))
+                        {
+                            tile.ToggleExit(dir.Value);
+                        }
+                        break;
+                    case ToolboxTool.WALL:
+                        toggleWall(_selectedTileCoord.Value, dir.Value);
+                        break;
+                    case ToolboxTool.ENEMY:
+                        if (dir.Value == Direction.Up) { 
+                            tile.SetTileType(TileType.ENEMY);
+                        }
+                        else if (dir.Value == Direction.Down)
+                        {
+                            if (tile.GetTileType() == TileType.ENEMY){
+                                tile.SetTileType(TileType.EMPTY);
+                            }
+                        }
+                        break;
+                    case ToolboxTool.HERO:
+                        if (dir.Value == Direction.Up)
+                        {
+                            tile.SetTileType(TileType.HERO);
+                        }
+                        else if (dir.Value == Direction.Down)
+                        {
+                            if (tile.GetTileType() == TileType.HERO)
+                            {
+                                tile.SetTileType(TileType.EMPTY);
+                            }
+                        }
+                        break;
                 }
             }
         }
