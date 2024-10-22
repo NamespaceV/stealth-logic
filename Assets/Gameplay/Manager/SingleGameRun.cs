@@ -287,8 +287,11 @@ namespace Assets.Gameplay.Manager
                 var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, d);
                 if (adjacent?.GetOccupierTileType() == TileOccupierType.HERO)
                 {
-                    _currentRun.PlayerLost();
-                    moveTo(adjacent);
+                    if (adjacent.FloorType != TileFloorType.WATER)
+                    {
+                        _currentRun.PlayerLost();
+                        moveTo(adjacent);
+                    }
                     return;
                 }
                 if (adjacent?.GetOccupierTileType() == TileOccupierType.EMPTY)
@@ -301,6 +304,8 @@ namespace Assets.Gameplay.Manager
                 var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
 
                 if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
+                if (adjacent.FloorType == TileFloorType.WATER) { return; }
+
 
                 moveTo(adjacent);
 
