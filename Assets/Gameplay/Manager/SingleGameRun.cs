@@ -21,6 +21,7 @@ namespace Assets.Gameplay.Manager
         [Header("Map")]
         [SerializeField] private GameObject LevelParent;
         [SerializeField] private GameObject FloorTilePrefab;
+        [SerializeField] private GameObject FloorWaterTilePrefab;
         [SerializeField] private GameObject WallTilePrefab;
         [SerializeField] private GameObject PlayerPrefab;
         [SerializeField] private GameObject EnemyPrefab;
@@ -108,9 +109,11 @@ namespace Assets.Gameplay.Manager
             {
                 for (int x = 0; x < _mgr.mapWidth; x++)
                 {
-                    GameObject floor = Instantiate(FloorTilePrefab, new Vector3(x, 0, y), Quaternion.identity);
+                    var tile = grid.GetTile(new Vector2Int(x, y));
+                    var prefab = tile.FloorType == TileFloorType.WATER ? FloorWaterTilePrefab : FloorTilePrefab;
+                    GameObject floor = Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
                     floor.transform.SetParent(LevelParent.transform);
-                    grid.GetTile(new Vector2Int(x, y)).SetFloor3D(floor);
+                    tile.SetFloor3D(floor);
                 }
             }
 

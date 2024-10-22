@@ -1496,6 +1496,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LevelParent: {fileID: 1587948793}
   FloorTilePrefab: {fileID: 410553896753926156, guid: 0cc9ab5a63855b147a63fd43ef886ce3, type: 3}
+  FloorWaterTilePrefab: {fileID: 410553896753926156, guid: 75f3c26df1fc7264cba174d47d60e08c, type: 3}
   WallTilePrefab: {fileID: 4543977208508056312, guid: c4feca87208a3ba47a8a16c074b8475a, type: 3}
   PlayerPrefab: {fileID: 8934367735989853692, guid: a5dd139018452874bb316db507774930, type: 3}
   EnemyPrefab: {fileID: 6559972464492696789, guid: 93ab80e87d975fb40bea07a5dbd5c7cc, type: 3}
