@@ -47,11 +47,11 @@ namespace Assets.Gameplay.Manager
 
             foreach (var tile in _mgr.GetGrid())
             {
-                if (tile.GetTileType() == TileType.HERO)
+                if (tile.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     _playerCoords.Add(tile.GetCoords());
                 }
-                else if (tile.GetTileType() == TileType.ENEMY)
+                else if (tile.GetOccupierTileType() == TileOccupierType.ENEMY)
                 {
                     _enemies.Add(new EnemyState(_mgr, this, tile.GetCoords()));
                 }
@@ -118,16 +118,16 @@ namespace Assets.Gameplay.Manager
             {
                ProcessWalls(tile);
 
-                switch (tile.GetTileType())
+                switch (tile.GetOccupierTileType())
                 {
-                    case TileType.EMPTY:
+                    case TileOccupierType.EMPTY:
                         break;
-                    case TileType.ENEMY:
+                    case TileOccupierType.ENEMY:
                         GameObject enemy = Instantiate(EnemyPrefab, tile.Pos, Quaternion.identity);
                         enemy.transform.SetParent(LevelParent.transform);
                         tile.currentObject = enemy;
                         break;
-                    case TileType.HERO:
+                    case TileOccupierType.HERO:
                         GameObject player = Instantiate(PlayerPrefab, tile.Pos, Quaternion.identity);
                         player.transform.SetParent(LevelParent.transform);
                         tile.currentObject = player;
@@ -187,17 +187,17 @@ namespace Assets.Gameplay.Manager
             var playerTile = g.GetTile(playerCoords);
             var targetTile = g.GetAdjacentTile(playerCoords, dir.Value);
 
-            if (targetTile?.GetTileType() == TileType.EMPTY
+            if (targetTile?.GetOccupierTileType() == TileOccupierType.EMPTY
                     && playerTile.AllowsMove(dir.Value))
             {
                 if (targetTile.OnTileInteractable != null)
                 {
                     targetTile.OnTileInteractable.Interact(this, playerCoords);
                 }
-                playerTile.SetTileType(TileType.EMPTY);
+                playerTile.SetTileOccupierType(TileOccupierType.EMPTY);
                 playerTile.MoveObjectToTile(targetTile);
                 playerTile.SetSelected(false);
-                targetTile.SetTileType(TileType.HERO);
+                targetTile.SetTileOccupierType(TileOccupierType.HERO);
                 targetTile.SetSelected(true);
                 _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
                 moveEnemies();
@@ -236,7 +236,7 @@ namespace Assets.Gameplay.Manager
                 _playerCoords.Remove(coord);
                 var t = _mgr.GetGrid().GetTile(coord);
                 t.SetSelected(false);
-                t.SetTileType(TileType.EMPTY);
+                t.SetTileOccupierType(TileOccupierType.EMPTY);
                 t.RemoveCurrentObject();
             }
             if (_playerCoords.Count == 0)
@@ -282,13 +282,13 @@ namespace Assets.Gameplay.Manager
                 var d = (Direction)dir;
                 if (!tile.AllowsMove(d)) { continue; }
                 var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, d);
-                if (adjacent?.GetTileType() == TileType.HERO)
+                if (adjacent?.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     _currentRun.PlayerLost();
                     moveTo(adjacent);
                     return;
                 }
-                if (adjacent?.GetTileType() == TileType.EMPTY)
+                if (adjacent?.GetOccupierTileType() == TileOccupierType.EMPTY)
                 {
                     seekPlayer(adjacent, d);
                 }
@@ -297,7 +297,7 @@ namespace Assets.Gameplay.Manager
             {
                 var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
 
-                if (adjacent.GetTileType() != TileType.EMPTY) { return; }
+                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
 
                 moveTo(adjacent);
 
@@ -316,7 +316,7 @@ namespace Assets.Gameplay.Manager
             {
                 distance += 1;
                 tile = _mgr.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
-                if (tile?.GetTileType() == TileType.HERO)
+                if (tile?.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
                     {
@@ -334,9 +334,9 @@ namespace Assets.Gameplay.Manager
 
         private void moveTo(Tile adjacent)
         {
-            _myTile.SetTileType(TileType.EMPTY);
+            _myTile.SetTileOccupierType(TileOccupierType.EMPTY);
             _myTile.MoveObjectToTile(adjacent);
-            adjacent.SetTileType(TileType.ENEMY);
+            adjacent.SetTileOccupierType(TileOccupierType.ENEMY);
             _coord = adjacent.GetCoords();
         }
     }

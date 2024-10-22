@@ -28,7 +28,7 @@ namespace Assets.Common.Scripts
     [Serializable]
     public class TileData
     {
-        public TileType Type;
+        public TileOccupierType Type;
         public int HeroCount;
         public List<bool> Walls;
         public List<bool> Exits;

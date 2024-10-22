@@ -5,11 +5,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public enum TileType
+public enum TileOccupierType
 {
     EMPTY,
     ENEMY,
     HERO,
+}
+
+
+public enum TileFloorType
+{
+    EMPTY,
+    WATER,
 }
 
 public class Tile : MonoBehaviour, IPointerClickHandler
@@ -27,7 +34,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private GameManager _mgr;
     private Vector2Int _coord;
     public Vector3 Pos;
-    private TileType _type;
+    private TileOccupierType _occupierType;
+    private TileFloorType _floorType;
     private int _heroCount;
     public GameObject currentObject;
     [SerializeField] private bool _selected;
@@ -52,7 +60,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     public void ReadFromData(TileData tileData)
     {
-        SetTileType(tileData.Type);
+        SetTileOccupierType(tileData.Type);
         _walls = new List<bool>(tileData.Walls);
         _exits = new List<bool>(tileData.Exits);
         for (int i = 0; i < 4; ++i)
@@ -65,7 +73,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public TileData ToData()
     {
         var result = new TileData();
-        result.Type = _type;
+        result.Type = _occupierType;
         result.Walls = new List<bool>(_walls);
         result.Exits = new List<bool>(_exits);
         result.HeroCount = _heroCount;
@@ -105,15 +113,15 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void SetTileType(TileType type)
+    public void SetTileOccupierType(TileOccupierType type)
     {
-        _type = type;
-        PlayerVisualisation.SetActive(type == TileType.HERO);
-        EnemyVisualisation.SetActive(type == TileType.ENEMY);
+        _occupierType = type;
+        PlayerVisualisation.SetActive(type == TileOccupierType.HERO);
+        EnemyVisualisation.SetActive(type == TileOccupierType.ENEMY);
     }
 
-    public TileType GetTileType(){
-        return _type;
+    public TileOccupierType GetOccupierTileType(){
+        return _occupierType;
     }
 
     public void TryInteract(Direction direction, SingleGameRun currentRun)

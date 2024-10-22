@@ -105,8 +105,8 @@ namespace Assets.Gameplay.Manager
             else if (button == PointerEventData.InputButton.Right)
             {
                 var tile = _grid.GetTile(coord);
-                var type = tile.GetTileType();
-                tile.SetTileType((TileType)(((int)type + 1) % 3));
+                var type = tile.GetOccupierTileType();
+                tile.SetTileOccupierType((TileOccupierType)(((int)type + 1) % 3));
             }
         }
 
@@ -137,25 +137,25 @@ namespace Assets.Gameplay.Manager
                         break;
                     case ToolboxTool.ENEMY:
                         if (dir.Value == Direction.Up) { 
-                            tile.SetTileType(TileType.ENEMY);
+                            tile.SetTileOccupierType(TileOccupierType.ENEMY);
                         }
                         else if (dir.Value == Direction.Down)
                         {
-                            if (tile.GetTileType() == TileType.ENEMY){
-                                tile.SetTileType(TileType.EMPTY);
+                            if (tile.GetOccupierTileType() == TileOccupierType.ENEMY){
+                                tile.SetTileOccupierType(TileOccupierType.EMPTY);
                             }
                         }
                         break;
                     case ToolboxTool.HERO:
                         if (dir.Value == Direction.Up)
                         {
-                            tile.SetTileType(TileType.HERO);
+                            tile.SetTileOccupierType(TileOccupierType.HERO);
                         }
                         else if (dir.Value == Direction.Down)
                         {
-                            if (tile.GetTileType() == TileType.HERO)
+                            if (tile.GetOccupierTileType() == TileOccupierType.HERO)
                             {
-                                tile.SetTileType(TileType.EMPTY);
+                                tile.SetTileOccupierType(TileOccupierType.EMPTY);
                             }
                         }
                         break;
