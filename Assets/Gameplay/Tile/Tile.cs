@@ -63,6 +63,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public void ReadFromData(TileData tileData)
     {
         SetTileOccupierType(tileData.Type);
+        SetFloorType(tileData.Floor);
         _walls = new List<bool>(tileData.Walls);
         _exits = new List<bool>(tileData.Exits);
         for (int i = 0; i < 4; ++i)
@@ -76,6 +77,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         var result = new TileData();
         result.Type = _occupierType;
+        result.Floor = _floorType;
         result.Walls = new List<bool>(_walls);
         result.Exits = new List<bool>(_exits);
         result.HeroCount = _heroCount;

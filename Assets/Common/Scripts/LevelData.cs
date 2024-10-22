@@ -29,6 +29,7 @@ namespace Assets.Common.Scripts
     public class TileData
     {
         public TileOccupierType Type;
+        public TileFloorType Floor;
         public int HeroCount;
         public List<bool> Walls;
         public List<bool> Exits;
