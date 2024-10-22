@@ -159,6 +159,19 @@ namespace Assets.Gameplay.Manager
                             }
                         }
                         break;
+                     case ToolboxTool.WATER:
+                        if (dir.Value == Direction.Up)
+                        {
+                            tile.FloorType = TileFloorType.WATER;
+                        }
+                        else if (dir.Value == Direction.Down)
+                        {
+                            if (tile.FloorType == TileFloorType.WATER)
+                            {
+                                tile.FloorType = TileFloorType.EMPTY;
+                            }
+                        }
+                        break;
                 }
             }
         }

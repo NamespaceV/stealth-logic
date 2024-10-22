@@ -12,7 +12,6 @@ public enum TileOccupierType
     HERO,
 }
 
-
 public enum TileFloorType
 {
     EMPTY,
@@ -24,6 +23,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     [SerializeField] private SpriteRenderer Background;
     [SerializeField] private GameObject PlayerVisualisation;
     [SerializeField] private GameObject EnemyVisualisation;
+    [SerializeField] private GameObject WaterVisualisation;
 
     public IInteractable OnTileInteractable;
     public Dictionary<Direction, IInteractable> Interactables = new();
@@ -40,6 +40,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public GameObject currentObject;
     [SerializeField] private bool _selected;
     [SerializeField] private GameObject _floor3d;
+
+    public TileFloorType FloorType { get => _floorType; set => SetFloorType(value); }
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
         _mgr = manager;
@@ -118,6 +120,13 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _occupierType = type;
         PlayerVisualisation.SetActive(type == TileOccupierType.HERO);
         EnemyVisualisation.SetActive(type == TileOccupierType.ENEMY);
+    }
+
+
+    private void SetFloorType(TileFloorType value)
+    {
+        _floorType = value;
+        WaterVisualisation.SetActive(_floorType == TileFloorType.WATER);
     }
 
     public TileOccupierType GetOccupierTileType(){

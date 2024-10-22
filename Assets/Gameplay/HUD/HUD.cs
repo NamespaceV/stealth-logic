@@ -42,7 +42,7 @@ public class HUD : MonoBehaviour
         AddToolbox("Enemy");
         AddToolbox("Hero");
         AddToolbox("Exit");
-        //AddToolbox("Water");
+        AddToolbox("Water");
         ToggleToolboxButton(_selectedToolIdx);
     }
 
