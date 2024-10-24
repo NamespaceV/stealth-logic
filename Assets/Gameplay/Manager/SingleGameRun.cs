@@ -279,48 +279,45 @@ namespace Assets.Gameplay.Manager
         {
             _lastSeenInCurrentTurn = false;
 
-            var tile = _myTile;
-            for (int dir = 0; dir < 4; ++dir)
-            {
-                var d = (Direction)dir;
-                if (!tile.AllowsMove(d)) { continue; }
-                var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, d);
-                if (adjacent?.GetOccupierTileType() == TileOccupierType.HERO)
-                {
-                    if (adjacent.FloorType != TileFloorType.WATER)
-                    {
-                        _currentRun.PlayerLost();
-                        moveTo(adjacent);
-                    }
-                    return;
-                }
-                if (adjacent?.GetOccupierTileType() == TileOccupierType.EMPTY)
-                {
-                    seekPlayer(adjacent, d);
-                }
-            }
+            SeekForPlayers();
+            
             if (_lastSeenPursueActive)
             {
                 var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
-
-                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
                 if (adjacent.FloorType == TileFloorType.WATER) { return; }
-
-
+                if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
+                {
+                    _currentRun.PlayerLost();
+                    moveTo(adjacent);
+                    return;
+                }
+                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
+                
                 moveTo(adjacent);
-
                 _lastSeenDistance -= 1;
                 if (_lastSeenDistance == 0)
                 {
                     _lastSeenPursueActive = false;
                 }
+                
+                SeekForPlayers();
+            }
+        }
+
+        private void SeekForPlayers()
+        {
+            for (int dir = 0; dir < 4; ++dir)
+            {
+                var d = (Direction)dir;
+                if (!_myTile.AllowsMove(d)) { continue; }
+                seekPlayer(_myTile, d);
             }
         }
 
         private void seekPlayer(Tile tile, Direction d)
         {
-            var distance = 1;
-            while (tile && tile.AllowsMove(d))
+            var distance = 0;
+            while (tile != null && tile.AllowsMove(d))
             {
                 distance += 1;
                 tile = _mgr.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
@@ -328,7 +325,7 @@ namespace Assets.Gameplay.Manager
                 {
                     if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
                     {
-                        // keep previous player seenm this turn as they ware closer
+                        // keep previous player seen this turn as they were closer
                         continue;
                     }
                     _lastSeenPursueActive = true;
@@ -336,6 +333,7 @@ namespace Assets.Gameplay.Manager
                     _lastSeenDirection = d;
                     _lastSeenDistance = distance;
                     _lastSeenCoord = tile.GetCoords();
+                    Debug.Log($"enemy on {_myTile}  spotted player on {tile} distance {distance}.");
                 }
             }
         }
