@@ -11,6 +11,10 @@ public enum ToolboxTool {
     HERO,
     EXIT,
     WATER,
+    DOOR,
+    GATE,
+    RAINBOWGATE,
+    BUTTON,
 }
 
 public class HUD : MonoBehaviour
@@ -24,10 +28,14 @@ public class HUD : MonoBehaviour
 
     [SerializeField] private GameObject _toolbox;
     [SerializeField] private GameObject _toolboxButtonPrefab;
+    
+    [SerializeField] private RawImage _doorColorPicker;
+
 
     private List<Button> _toolboxButtons = new List<Button>();
     private List<bool> _toolboxButtonsSelected = new List<bool>();
     private int _selectedToolIdx = 0;
+    private DoorColor _selectedDoorColor;
 
     public ToolboxTool GetSelectedTool() { return (ToolboxTool)_selectedToolIdx; }
     public void SelectTool(ToolboxTool tool) { ToolClicked((int)tool); }
@@ -43,7 +51,14 @@ public class HUD : MonoBehaviour
         AddToolbox("Hero");
         AddToolbox("Exit");
         AddToolbox("Water");
+        AddToolbox("Door");
+        AddToolbox("Gate");
+        AddToolbox("Rainbow Gate");
+        AddToolbox("Button");
+
         ToggleToolboxButton(_selectedToolIdx);
+
+        _doorColorPicker.color = Wall.FromColor(GetSelectedDoorColor());
     }
 
     private void ClearToolbox()
@@ -114,4 +129,14 @@ public class HUD : MonoBehaviour
         _mainMessage.enabled = !string.IsNullOrWhiteSpace(text);
     }
 
+    public DoorColor GetSelectedDoorColor()
+    {
+        return _selectedDoorColor;
+    }
+
+    public void ToggleSelectedButtonColor(bool forward)
+    {
+        _selectedDoorColor = forward ? Wall.Next(_selectedDoorColor) : Wall.Prev(_selectedDoorColor);
+        _doorColorPicker.color = Wall.FromColor(_selectedDoorColor);
+    }
 }

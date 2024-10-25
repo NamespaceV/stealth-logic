@@ -144,28 +144,28 @@ namespace Assets.Gameplay.Manager
             if (tile.CheckWall(Direction.Up))
             {
                 GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.identity);
-                if (tile.GetWall(Direction.Up).isExit)
+                if (tile.GetWall(Direction.Up).IsExit)
                     wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }
             if (tile.CheckWall(Direction.Down))
             {
                 GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 180, 0)));
-                if (tile.GetWall(Direction.Down).isExit) 
+                if (tile.GetWall(Direction.Down).IsExit) 
                     wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }
             if (tile.CheckWall(Direction.Left))
             {
                 GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, -90, 0)));
-                if (tile.GetWall(Direction.Left).isExit) 
+                if (tile.GetWall(Direction.Left).IsExit) 
                     wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }
             if (tile.CheckWall(Direction.Right))
             {
                 GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 90, 0)));
-                if (tile.GetWall(Direction.Right).isExit) 
+                if (tile.GetWall(Direction.Right).IsExit) 
                     wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }

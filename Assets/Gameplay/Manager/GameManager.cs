@@ -126,15 +126,6 @@ namespace Assets.Gameplay.Manager
             {
                 var tile = _grid.GetTile(_selectedTileCoord.Value);
                 switch (_hud.GetSelectedTool()) {
-                    case ToolboxTool.EXIT:
-                        if (tile.CheckWall(dir.Value))
-                        {
-                            tile.ToggleExit(dir.Value);
-                        }
-                        break;
-                    case ToolboxTool.WALL:
-                        toggleWall(_selectedTileCoord.Value, dir.Value);
-                        break;
                     case ToolboxTool.ENEMY:
                         if (dir.Value == Direction.Up) { 
                             tile.SetTileOccupierType(TileOccupierType.ENEMY);
@@ -172,6 +163,35 @@ namespace Assets.Gameplay.Manager
                             }
                         }
                         break;
+                    case ToolboxTool.WALL:
+                        toggleWall(_selectedTileCoord.Value, dir.Value);
+                        break;
+                    case ToolboxTool.EXIT:
+                        tile.ToggleExit(dir.Value);
+                        break;
+                     case ToolboxTool.DOOR:
+                        tile.ToggleDoor(dir.Value, _hud.GetSelectedDoorColor());
+                        _grid.GetAdjacentTile(_selectedTileCoord.Value, dir.Value)?.ToggleDoor(dir.Value.Opposite(),  _hud.GetSelectedDoorColor());
+                        break;
+                     case ToolboxTool.GATE:
+                        tile.ToggleGate(dir.Value,_hud.GetSelectedDoorColor());
+                        _grid.GetAdjacentTile(_selectedTileCoord.Value, dir.Value)?.ToggleGate(dir.Value.Opposite(),  _hud.GetSelectedDoorColor());
+                        break;
+                    case ToolboxTool.RAINBOWGATE:
+                        tile.ToggleRainbowGate(dir.Value);
+                        _grid.GetAdjacentTile(_selectedTileCoord.Value, dir.Value)?.ToggleRainbowGate(dir.Value.Opposite());
+                        break;
+                    case ToolboxTool.BUTTON:
+                        if (dir.Value == Direction.Up || dir.Value == Direction.Down)
+                        {
+                            tile.ToggleButton(_hud.GetSelectedDoorColor());
+                        }
+                        else
+                        {
+                            _hud.ToggleSelectedButtonColor(dir.Value == Direction.Right);
+                        }
+                        break;
+
                 }
             }
         }
@@ -207,7 +227,6 @@ namespace Assets.Gameplay.Manager
                 initialPath: LevelsPath,
                 initialFilename:"level.json",
                 title:"Select File", saveButtonText:"Save");
-
         }
 
         private LevelData serializeCurrentLevel()

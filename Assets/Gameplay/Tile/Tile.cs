@@ -21,9 +21,11 @@ public enum TileFloorType
 public class Tile : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private SpriteRenderer Background;
-    [SerializeField] private GameObject PlayerVisualisation;
-    [SerializeField] private GameObject EnemyVisualisation;
-    [SerializeField] private GameObject WaterVisualisation;
+    [SerializeField] private GameObject     PlayerVisualisation;
+    [SerializeField] private GameObject     EnemyVisualisation;
+    [SerializeField] private GameObject     WaterVisualisation;
+    [SerializeField] private SpriteRenderer ButtonVisualisation;
+
 
     public IInteractable OnTileInteractable;
     public Dictionary<Direction, IInteractable> Interactables = new();
@@ -36,6 +38,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public Vector3 Pos;
     private TileOccupierType _occupierType;
     private TileFloorType _floorType;
+    private DoorColor? _buttonColor;
     private int _heroCount;
     public GameObject currentObject;
     [SerializeField] private bool _selected;
@@ -104,6 +107,25 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         {
             Interactables[dir] = null;
         }
+    }
+    
+    
+    public void ToggleDoor(Direction dir, DoorColor doorColor)
+    {
+        if (!CheckWall(dir)) return;
+        Walls[(int)dir].ToggleDoor(doorColor);
+    }
+    
+    public void ToggleGate(Direction dir, DoorColor gateColor)
+    {
+        if (!CheckWall(dir)) return;
+        Walls[(int)dir].ToggleGate(gateColor);
+    }
+    
+    public void ToggleRainbowGate(Direction dir)
+    {
+        if (!CheckWall(dir)) return;
+        Walls[(int)dir].ToggleRainbowGate();
     }
 
     public void SetSelected(bool val)
@@ -175,14 +197,24 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     internal void ToggleExit(Direction dir)
     {
+        if (!CheckWall(dir)) return;
         GetWall(dir).ToggleExit();
-        _exits[(int)dir] = GetWall(dir).isExit;
-
+        _exits[(int)dir] = GetWall(dir).IsExit;
     }
 
     public void SetFloor3D(GameObject floor3d)
     {
         _floor3d = floor3d;
         _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive: true)?.gameObject.SetActive(_selected);
+    }
+
+    public void ToggleButton(DoorColor buttonColor)
+    {
+        _buttonColor = _buttonColor != buttonColor ? buttonColor : null;
+        ButtonVisualisation.gameObject.SetActive(_buttonColor.HasValue);
+        if (_buttonColor.HasValue)
+        {
+            ButtonVisualisation.color = Wall.FromColor(_buttonColor.Value);
+        }
     }
 }
