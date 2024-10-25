@@ -2,6 +2,7 @@ using Assets.Gameplay.Manager;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public enum DoorType
 {
@@ -19,7 +20,6 @@ public enum DoorColor
     COLOR_3,
     COLOR_4,
 }
-
 
 public class Wall : MonoBehaviour, IInteractable
 {
@@ -43,13 +43,19 @@ public class Wall : MonoBehaviour, IInteractable
     private Color _exitColor = Color.cyan;
 
     private Tile _tile;
-    private SpriteRenderer _spriteRenderer;
+    [SerializeField] private SpriteRenderer _wallSpriteRenderer;
+    [SerializeField] private SpriteRenderer _doorSprite;
+    [SerializeField] private SpriteRenderer _doorOpeningSprite;
+    [SerializeField] private SpriteRenderer _gateSprite;
+    [SerializeField] private SpriteRenderer _rainbowGateSprite;
+
+
+    
 
     private void Awake()
     {
         _tile = GetComponentInParent<Tile>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _defaultColor = _spriteRenderer.color;
+        _defaultColor = _wallSpriteRenderer.color;
     }
 
     private void Start()
@@ -66,15 +72,20 @@ public class Wall : MonoBehaviour, IInteractable
     public void ToggleExit()
     {
         _doorType = IsExit ? DoorType.NONE : DoorType.EXIT;
-        _spriteRenderer.color = GetWallColor();
+        UpdateWallSprites();
     }
 
-    private Color GetWallColor()
+    private void UpdateWallSprites()
     {
-        if (IsExit) return _exitColor;
-        if (_doorType == DoorType.DOOR) return FromColor(_doorColor);
-        if (_doorType == DoorType.GATE_SINGLE) return FromColor(_doorColor);
-        return _defaultColor;
+        _wallSpriteRenderer.color = IsExit ? _exitColor : _defaultColor;
+        
+        _doorSprite.gameObject.SetActive(_doorType == DoorType.DOOR || _doorType == DoorType.GATE_SINGLE);
+        _doorSprite.color = FromColor(_doorColor);
+        _gateSprite.gameObject.SetActive(_doorType == DoorType.GATE_SINGLE);
+        _gateSprite.color = FromColor(_doorColor);
+        _rainbowGateSprite.gameObject.SetActive(_doorType == DoorType.GATE_RAINBOW);
+        
+        _doorOpeningSprite.gameObject.SetActive(false);
     }
 
     public void ToggleDoor(DoorColor doorColor)
@@ -88,7 +99,7 @@ public class Wall : MonoBehaviour, IInteractable
             _doorType = DoorType.DOOR;
             _doorColor = doorColor;
         }
-        _spriteRenderer.color = GetWallColor();
+        UpdateWallSprites();
     }
     
     public void ToggleGate(DoorColor gateColor)
@@ -102,13 +113,13 @@ public class Wall : MonoBehaviour, IInteractable
             _doorType = DoorType.GATE_SINGLE;
             _doorColor = gateColor;
         }
-        _spriteRenderer.color = GetWallColor();
+        UpdateWallSprites();
     }
     
     public void ToggleRainbowGate()
     {
         _doorType = _doorType == DoorType.GATE_RAINBOW ? DoorType.NONE : DoorType.GATE_RAINBOW;
-        _spriteRenderer.color = GetWallColor();
+        UpdateWallSprites();
     }
 
 

@@ -104,6 +104,7 @@ public class HUD : MonoBehaviour
         _runButtonText.text = "Quit play";
         _saveButton.gameObject.SetActive(false);
         _loadButton.gameObject.SetActive(false);
+        _doorColorPicker.gameObject.SetActive(false);
         _toolbox.SetActive(false);
         SetSmallMessage("");
         SetMainMessage("");
@@ -113,6 +114,7 @@ public class HUD : MonoBehaviour
         _runButtonText.text = "Play";
         _saveButton.gameObject.SetActive(true);
         _loadButton.gameObject.SetActive(true);
+        _doorColorPicker.gameObject.SetActive(true);
         _toolbox.SetActive(true);
         SetSmallMessage("");
         SetMainMessage("");
