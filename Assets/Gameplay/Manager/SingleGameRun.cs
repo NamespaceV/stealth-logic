@@ -141,31 +141,18 @@ namespace Assets.Gameplay.Manager
 
         private void ProcessWalls(Tile tile)
         {
-            if (tile.CheckWall(Direction.Up))
+            SpawnWall3d(tile, Direction.Up, Quaternion.identity);
+            SpawnWall3d(tile, Direction.Down, Quaternion.Euler(new(0, 180, 0)));
+            SpawnWall3d(tile, Direction.Left, Quaternion.Euler(new(0, -90, 0)));
+            SpawnWall3d(tile, Direction.Right, Quaternion.Euler(new(0, 90, 0)));
+        }
+
+        private void SpawnWall3d(Tile tile, Direction dir, Quaternion rotation)
+        {
+            if (tile.HasWall(dir))
             {
-                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.identity);
-                if (tile.GetWall(Direction.Up).IsExit)
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
-                wall.transform.SetParent(LevelParent.transform);
-            }
-            if (tile.CheckWall(Direction.Down))
-            {
-                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 180, 0)));
-                if (tile.GetWall(Direction.Down).IsExit) 
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
-                wall.transform.SetParent(LevelParent.transform);
-            }
-            if (tile.CheckWall(Direction.Left))
-            {
-                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, -90, 0)));
-                if (tile.GetWall(Direction.Left).IsExit) 
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
-                wall.transform.SetParent(LevelParent.transform);
-            }
-            if (tile.CheckWall(Direction.Right))
-            {
-                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, Quaternion.Euler(new(0, 90, 0)));
-                if (tile.GetWall(Direction.Right).IsExit) 
+                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, rotation);
+                if (tile.GetWall(dir).IsExit)
                     wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }

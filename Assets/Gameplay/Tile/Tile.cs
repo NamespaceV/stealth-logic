@@ -67,12 +67,9 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         SetTileOccupierType(tileData.Type);
         SetFloorType(tileData.Floor);
-        _walls = new List<bool>(tileData.Walls);
-        _exits = new List<bool>(tileData.Exits);
         for (int i = 0; i < 4; ++i)
         {
-            Walls[i].gameObject.SetActive(_walls[i]);
-            Walls[i].SetExit(tileData.Exits[i]);
+            Walls[i].ReadFromData(tileData.WallsData[i]);
         }
     }
 
@@ -84,6 +81,10 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         result.Walls = new List<bool>(_walls);
         result.Exits = new List<bool>(_exits);
         result.HeroCount = _heroCount;
+        for (int i = 0; i < 4; ++i)
+        {
+            result.WallsData.Add(Walls[i].ToData());
+        }
         return result;
     }
 
@@ -112,19 +113,19 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     
     public void ToggleDoor(Direction dir, DoorColor doorColor)
     {
-        if (!CheckWall(dir)) return;
+        if (!HasWall(dir)) return;
         Walls[(int)dir].ToggleDoor(doorColor);
     }
     
     public void ToggleGate(Direction dir, DoorColor gateColor)
     {
-        if (!CheckWall(dir)) return;
+        if (!HasWall(dir)) return;
         Walls[(int)dir].ToggleGate(gateColor);
     }
     
     public void ToggleRainbowGate(Direction dir)
     {
-        if (!CheckWall(dir)) return;
+        if (!HasWall(dir)) return;
         Walls[(int)dir].ToggleRainbowGate();
     }
 
@@ -170,11 +171,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         return _coord;
     }
 
-    public bool CheckWall(Direction dir) => _walls[(int)dir];
+    public bool HasWall(Direction dir) => Walls[(int)dir].Exists;
 
     public bool AllowsMove(Direction dir)
     {
-        return !CheckWall(dir);
+        return !HasWall(dir);
     }
 
     public Wall GetWall(Direction dir)
@@ -197,7 +198,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     internal void ToggleExit(Direction dir)
     {
-        if (!CheckWall(dir)) return;
+        if (!HasWall(dir)) return;
         GetWall(dir).ToggleExit();
         _exits[(int)dir] = GetWall(dir).IsExit;
     }

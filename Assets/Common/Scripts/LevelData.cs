@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Common.Scripts
@@ -17,9 +18,7 @@ namespace Assets.Common.Scripts
                 for (int y = 0; y < Size.y; ++y)
                 {
                     var tile = Tiles[x][y];
-                    if (tile.Exits == null || tile.Exits.Count != 4) {
-                        tile.Exits = new List<bool>{ false, false, false, false };
-                    }
+                    tile.Migrate();
                 }
             }
         }
@@ -31,9 +30,43 @@ namespace Assets.Common.Scripts
         public TileOccupierType Type;
         public TileFloorType Floor;
         public int HeroCount;
-        public List<bool> Walls;
-        public List<bool> Exits;
+        public List<bool> Walls; // TODO: LEGACY, DELETE
+        public List<bool> Exits; // TODO: LEGACY, DELETE
+        public List<WallData> WallsData = new List<WallData>(4);
+
+        public void Migrate()
+        {
+            if (Exits == null || Exits.Count != 4) {
+                Exits = new List<bool>{ false, false, false, false };
+            }
+            if (WallsData == null || WallsData.Count != 4)
+            {
+                WallsData = new List<WallData>();
+                for (int dir = 0; dir < 4; ++dir)
+                {
+                    WallsData.Add(WallData.NoWall());
+                    if (Walls[dir])
+                    {
+                        WallsData[dir].Exists = true;
+                    }
+                    if (Exits[dir])
+                    {
+                        WallsData[dir].DoorType = DoorType.EXIT;
+                    }
+                }
+            }
+        }
     }
+    
+    [Serializable]
+    public class WallData
+    {
+        public bool Exists;
+        public DoorType DoorType;
+        public DoorColor DoorColor;
+        public static WallData NoWall() { return new WallData { Exists = false }; }
+    }
+    
 
     // Unity cant serialize List<List<>> :/
     // https://discussions.unity.com/t/serialize-nested-lists/47472/2

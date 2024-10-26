@@ -1,6 +1,7 @@
 using Assets.Gameplay.Manager;
 using System.Collections;
 using System.Collections.Generic;
+using Assets.Common.Scripts;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -34,6 +35,8 @@ public class Wall : MonoBehaviour, IInteractable
     public static DoorColor Next(DoorColor a) => (DoorColor)(((int)a + 1) % DoorColors.Length);
     public static DoorColor Prev(DoorColor a) => (DoorColor)(((int)a - 1 + DoorColors.Length) % DoorColors.Length);
     public bool IsExit => _doorType == DoorType.EXIT;
+    public bool Exists => gameObject.activeSelf;
+
     private GameManager _gameManager;
 
     private DoorType _doorType;
@@ -49,9 +52,6 @@ public class Wall : MonoBehaviour, IInteractable
     [SerializeField] private SpriteRenderer _gateSprite;
     [SerializeField] private SpriteRenderer _rainbowGateSprite;
 
-
-    
-
     private void Awake()
     {
         _tile = GetComponentInParent<Tile>();
@@ -61,18 +61,6 @@ public class Wall : MonoBehaviour, IInteractable
     private void Start()
     {
         _gameManager = GameManager.Instance;
-    }
-
-    public void SetExit(bool exit){
-        if (exit != IsExit){
-            ToggleExit();
-        }
-    }
-
-    public void ToggleExit()
-    {
-        _doorType = IsExit ? DoorType.NONE : DoorType.EXIT;
-        UpdateWallSprites();
     }
 
     private void UpdateWallSprites()
@@ -86,6 +74,12 @@ public class Wall : MonoBehaviour, IInteractable
         _rainbowGateSprite.gameObject.SetActive(_doorType == DoorType.GATE_RAINBOW);
         
         _doorOpeningSprite.gameObject.SetActive(false);
+    }
+    
+    public void ToggleExit()
+    {
+        _doorType = IsExit ? DoorType.NONE : DoorType.EXIT;
+        UpdateWallSprites();
     }
 
     public void ToggleDoor(DoorColor doorColor)
@@ -129,5 +123,27 @@ public class Wall : MonoBehaviour, IInteractable
         {
             gameRun.Escape(coord);
         }
+    }
+
+    public void ReadFromData(WallData wallData)
+    {
+        if (!wallData.Exists)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+
+        _doorType = wallData.DoorType;
+        _doorColor = wallData.DoorColor;
+        UpdateWallSprites();
+    }
+    
+    public WallData ToData()
+    {
+        var result = new WallData();
+        result.Exists = gameObject.activeSelf;
+        result.DoorType = _doorType;
+        result.DoorColor = _doorColor;
+        return result;
     }
 }
