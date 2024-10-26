@@ -76,6 +76,13 @@ public class Wall : MonoBehaviour, IInteractable
         _doorOpeningSprite.gameObject.SetActive(false);
     }
     
+    
+    public void ToggleWallExists()
+    {
+        gameObject.SetActive(!Exists);
+        UpdateWallSprites();
+    }
+    
     public void ToggleExit()
     {
         _doorType = IsExit ? DoorType.NONE : DoorType.EXIT;
@@ -146,4 +153,5 @@ public class Wall : MonoBehaviour, IInteractable
         result.DoorColor = _doorColor;
         return result;
     }
+
 }

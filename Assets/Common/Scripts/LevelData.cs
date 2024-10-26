@@ -33,6 +33,8 @@ namespace Assets.Common.Scripts
         public List<bool> Walls; // TODO: LEGACY, DELETE
         public List<bool> Exits; // TODO: LEGACY, DELETE
         public List<WallData> WallsData = new List<WallData>(4);
+        public bool HasButton; //Unity doesn't serialize DoorColor? so split into 2 fields
+        public DoorColor ButtonColor;
 
         public void Migrate()
         {

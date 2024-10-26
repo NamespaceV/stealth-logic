@@ -99,7 +99,6 @@ namespace Assets.Gameplay.Manager
             }
         }
 
-
         private void GenerateMap()
         {
             Clear3dMap();

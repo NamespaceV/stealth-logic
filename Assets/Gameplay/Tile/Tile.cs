@@ -31,8 +31,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public Dictionary<Direction, IInteractable> Interactables = new();
 
     [SerializeField] private List<Wall> Walls;
-    private List<bool> _walls = new List<bool>(4);
-    private List<bool> _exits = new List<bool>(4);
     private GameManager _mgr;
     private Vector2Int _coord;
     public Vector3 Pos;
@@ -54,11 +52,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             Interactables[(Direction)i] = Walls[i];
         }
 
-        if (_walls.Count != 4) { _walls = new List<bool> { true, true, true, true }; }
-        if (_exits.Count != 4) { _exits = new List<bool> { false, false, false, false }; }
-
-        Debug.Assert(_walls.Count == 4, $"{this} invalid wall count = {_walls.Count}");
-        Debug.Assert(_exits.Count == 4, $"{this} invalid exits count = {_exits.Count}");
+        Debug.Assert(Walls.Count == 4, $"{this} invalid Walls count = {Walls.Count}");
 
         Pos = new(_coord.x, 0, _coord.y);
     }
@@ -67,6 +61,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         SetTileOccupierType(tileData.Type);
         SetFloorType(tileData.Floor);
+        _buttonColor = tileData.HasButton ? tileData.ButtonColor : null;
+        UpdateButtonSprite();
         for (int i = 0; i < 4; ++i)
         {
             Walls[i].ReadFromData(tileData.WallsData[i]);
@@ -78,8 +74,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         var result = new TileData();
         result.Type = _occupierType;
         result.Floor = _floorType;
-        result.Walls = new List<bool>(_walls);
-        result.Exits = new List<bool>(_exits);
+        result.HasButton = _buttonColor.HasValue;
+        if (_buttonColor.HasValue)
+        {
+            result.ButtonColor = _buttonColor.Value;
+        }
         result.HeroCount = _heroCount;
         for (int i = 0; i < 4; ++i)
         {
@@ -97,17 +96,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public void ToggleWall(Direction dir)
     {
         var wallIdx = (int)dir;
-        _walls[wallIdx] = !_walls[wallIdx];
-        Walls[wallIdx].gameObject.SetActive(_walls[wallIdx]);
-
-        if (_walls[wallIdx])
-        {
-            Interactables[dir] = Walls[wallIdx];
-        }
-        else
-        {
-            Interactables[dir] = null;
-        }
+        Walls[wallIdx].ToggleWallExists();
+        Interactables[dir] = Walls[wallIdx].Exists ? Walls[wallIdx] : null;
     }
     
     
@@ -200,7 +190,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         if (!HasWall(dir)) return;
         GetWall(dir).ToggleExit();
-        _exits[(int)dir] = GetWall(dir).IsExit;
     }
 
     public void SetFloor3D(GameObject floor3d)
@@ -212,6 +201,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public void ToggleButton(DoorColor buttonColor)
     {
         _buttonColor = _buttonColor != buttonColor ? buttonColor : null;
+        UpdateButtonSprite();
+    }
+
+    private void UpdateButtonSprite()
+    {
         ButtonVisualisation.gameObject.SetActive(_buttonColor.HasValue);
         if (_buttonColor.HasValue)
         {
