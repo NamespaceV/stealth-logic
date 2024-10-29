@@ -1949,6 +1949,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 8934367735989853692, guid: a5dd139018452874bb316db507774930, type: 3}
   EnemyPrefab: {fileID: 6559972464492696789, guid: 93ab80e87d975fb40bea07a5dbd5c7cc, type: 3}
   ExitSprite: {fileID: 1692759999, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  ButtonPrefab: {fileID: 410553896753926156, guid: dba50b35b9efa4d42bdfc6a1cb3b092f, type: 3}
 --- !u!1 &1749212530
 GameObject:
   m_ObjectHideFlags: 0

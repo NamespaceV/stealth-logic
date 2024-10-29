@@ -2,8 +2,10 @@ using Assets.Common.Scripts;
 using Assets.Gameplay.Manager;
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.Controls;
 
 public enum TileOccupierType
 {
@@ -203,6 +205,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _buttonColor = _buttonColor != buttonColor ? buttonColor : null;
         UpdateButtonSprite();
     }
+
+    public DoorColor? GetButtonColor() => _buttonColor; 
 
     private void UpdateButtonSprite()
     {

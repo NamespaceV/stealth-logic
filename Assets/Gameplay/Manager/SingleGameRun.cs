@@ -28,6 +28,7 @@ namespace Assets.Gameplay.Manager
         [SerializeField] private GameObject PlayerPrefab;
         [SerializeField] private GameObject EnemyPrefab;
         [SerializeField] private Sprite ExitSprite;
+        [SerializeField] private GameObject ButtonPrefab;
 
         private HUD _hud;
 
@@ -42,7 +43,8 @@ namespace Assets.Gameplay.Manager
                 WallTilePrefab,
                 PlayerPrefab,
                 EnemyPrefab,
-                ExitSprite);
+                ExitSprite,
+                ButtonPrefab);
         }
 
         internal void SetHud(HUD hud)

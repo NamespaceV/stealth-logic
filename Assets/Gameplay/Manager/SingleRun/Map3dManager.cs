@@ -15,16 +15,17 @@ namespace Gameplay.Manager.SingleRun
         private GameObject PlayerPrefab;
         private GameObject EnemyPrefab;
         private Sprite ExitSprite;
-        
-        public Map3dManager(
-            GameManager mgr,
+        private readonly GameObject _buttonPrefab;
+
+        public Map3dManager(GameManager mgr,
             GameObject levelParent,
             GameObject floorTilePrefab,
             GameObject floorWaterTilePrefab,
             GameObject wallTilePrefab,
             GameObject playerPrefab,
             GameObject enemyPrefab,
-            Sprite exitSprite)
+            Sprite exitSprite,
+            GameObject buttonPrefab)
         {
             _mgr = mgr;
             LevelParent = levelParent;
@@ -34,6 +35,7 @@ namespace Gameplay.Manager.SingleRun
             PlayerPrefab = playerPrefab;
             EnemyPrefab = enemyPrefab;
             ExitSprite = exitSprite;
+            _buttonPrefab = buttonPrefab;
         }
 
         public void Generate()
@@ -47,9 +49,15 @@ namespace Gameplay.Manager.SingleRun
                 {
                     var tile = grid.GetTile(new Vector2Int(x, y));
                     var prefab = tile.FloorType == TileFloorType.WATER ? FloorWaterTilePrefab : FloorTilePrefab;
-                    GameObject floor = GameObject.Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
+                    GameObject floor = Object.Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
                     floor.transform.SetParent(LevelParent.transform);
                     tile.SetFloor3D(floor);
+                    var buttonColor = tile.GetButtonColor();
+                    if (buttonColor.HasValue)
+                    {
+                        var button = Object.Instantiate(_buttonPrefab, new Vector3(x, 0.01f, y), Quaternion.identity, floor.gameObject.transform);
+                        button.GetComponentInChildren<SpriteRenderer>().color = Wall.FromColor(buttonColor.Value);
+                    }
                 }
             }
 
