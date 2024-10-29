@@ -1,6 +1,7 @@
 ﻿using Assets.Common.Scripts;
 using System;
 using System.Collections.Generic;
+using Gameplay.Manager.SingleRun;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace Assets.Gameplay.Manager
     public class SingleGameRun : MonoBehaviour
     {
         private GameManager _mgr;
+        private Map3dManager _map3d;
 
         private bool _gameEnded;
 
@@ -32,6 +34,15 @@ namespace Assets.Gameplay.Manager
         private void Start()
         {
             _mgr = GameManager.Instance;
+            _map3d = new Map3dManager(
+                _mgr,
+                LevelParent,
+                FloorTilePrefab,
+                FloorWaterTilePrefab,
+                WallTilePrefab,
+                PlayerPrefab,
+                EnemyPrefab,
+                ExitSprite);
         }
 
         internal void SetHud(HUD hud)
@@ -58,7 +69,7 @@ namespace Assets.Gameplay.Manager
                 }
             }
 
-            GenerateMap();
+            _map3d.Generate();
             HideEditorMap();
 
             if (_playerCoords.Count == 0) {
@@ -72,7 +83,7 @@ namespace Assets.Gameplay.Manager
 
         internal void Quit()
         {
-            Clear3dMap();
+            _map3d.Clear();
             ShowEditorMap();
         }
 
@@ -92,70 +103,6 @@ namespace Assets.Gameplay.Manager
             }
         }
 
-        private void Clear3dMap() {
-            foreach (Transform child in LevelParent.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-
-        private void GenerateMap()
-        {
-            Clear3dMap();
-
-            var grid = _mgr.GetGrid();
-            for (int y = 0; y < _mgr.mapHeight; y++)
-            {
-                for (int x = 0; x < _mgr.mapWidth; x++)
-                {
-                    var tile = grid.GetTile(new Vector2Int(x, y));
-                    var prefab = tile.FloorType == TileFloorType.WATER ? FloorWaterTilePrefab : FloorTilePrefab;
-                    GameObject floor = Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
-                    floor.transform.SetParent(LevelParent.transform);
-                    tile.SetFloor3D(floor);
-                }
-            }
-
-            foreach (var tile in grid)
-            {
-               ProcessWalls(tile);
-
-                switch (tile.GetOccupierTileType())
-                {
-                    case TileOccupierType.EMPTY:
-                        break;
-                    case TileOccupierType.ENEMY:
-                        GameObject enemy = Instantiate(EnemyPrefab, tile.Pos, Quaternion.identity);
-                        enemy.transform.SetParent(LevelParent.transform);
-                        tile.currentObject = enemy;
-                        break;
-                    case TileOccupierType.HERO:
-                        GameObject player = Instantiate(PlayerPrefab, tile.Pos, Quaternion.identity);
-                        player.transform.SetParent(LevelParent.transform);
-                        tile.currentObject = player;
-                        break;
-                }
-            }
-        }
-
-        private void ProcessWalls(Tile tile)
-        {
-            SpawnWall3d(tile, Direction.Up, Quaternion.identity);
-            SpawnWall3d(tile, Direction.Down, Quaternion.Euler(new(0, 180, 0)));
-            SpawnWall3d(tile, Direction.Left, Quaternion.Euler(new(0, -90, 0)));
-            SpawnWall3d(tile, Direction.Right, Quaternion.Euler(new(0, 90, 0)));
-        }
-
-        private void SpawnWall3d(Tile tile, Direction dir, Quaternion rotation)
-        {
-            if (tile.HasWall(dir))
-            {
-                GameObject wall = Instantiate(WallTilePrefab, tile.Pos, rotation);
-                if (tile.GetWall(dir).IsExit)
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
-                wall.transform.SetParent(LevelParent.transform);
-            }
-        }
 
         public void ChangeSelection(bool deselect = true) {
             if (deselect) {
@@ -237,99 +184,6 @@ namespace Assets.Gameplay.Manager
             {
                 ChangeSelection(false);
             }
-        }
-    }
-
-    public class EnemyState
-    {
-        private GameManager _mgr;
-        private SingleGameRun _currentRun;
-        private Vector2Int _coord;
-
-        private bool _lastSeenInCurrentTurn;
-        private bool _lastSeenPursueActive;
-        private Vector2Int _lastSeenCoord;
-        private Direction _lastSeenDirection;
-        private int _lastSeenDistance;
-
-        public EnemyState(GameManager mgr, SingleGameRun currentRun, Vector2Int coord)
-        {
-            _mgr = mgr;
-            _currentRun = currentRun;
-            _coord = coord;
-        }
-
-        private Tile _myTile => _mgr.GetGrid().GetTile(_coord);
-
-        public void Move()
-        {
-            _lastSeenInCurrentTurn = false;
-
-            SeekForPlayers();
-            
-            if (_lastSeenPursueActive)
-            {
-                var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
-                if (adjacent.FloorType == TileFloorType.WATER) { return; }
-                if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
-                {
-                    _currentRun.PlayerLost();
-                    moveTo(adjacent);
-                    return;
-                }
-                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
-                
-                moveTo(adjacent);
-                _lastSeenDistance -= 1;
-                if (_lastSeenDistance == 0)
-                {
-                    _lastSeenPursueActive = false;
-                }
-                
-                SeekForPlayers();
-            }
-        }
-
-        private void SeekForPlayers()
-        {
-            for (int dir = 0; dir < 4; ++dir)
-            {
-                var d = (Direction)dir;
-                if (!_myTile.AllowsMove(d)) { continue; }
-                seekPlayer(_myTile, d);
-            }
-        }
-
-        private void seekPlayer(Tile tile, Direction d)
-        {
-            var distance = 0;
-            while (tile != null && tile.AllowsMove(d))
-            {
-                distance += 1;
-                tile = _mgr.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
-                if (tile?.GetOccupierTileType() == TileOccupierType.HERO)
-                {
-                    if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
-                    {
-                        // keep previous player seen this turn as they were closer
-                        continue;
-                    }
-                    _lastSeenPursueActive = true;
-                    _lastSeenInCurrentTurn = true;
-                    _lastSeenDirection = d;
-                    _lastSeenDistance = distance;
-                    _lastSeenCoord = tile.GetCoords();
-                    Debug.Log($"enemy on {_myTile}  spotted player on {tile} distance {distance}.");
-                }
-            }
-        }
-
-        private void moveTo(Tile adjacent)
-        {
-            _myTile.SetTileOccupierType(TileOccupierType.EMPTY);
-            _myTile.MoveObjectToTile(adjacent);
-            adjacent.SetTileOccupierType(TileOccupierType.ENEMY);
-            _coord = adjacent.GetCoords();
         }
     }
 }
