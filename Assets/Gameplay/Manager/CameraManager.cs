@@ -24,7 +24,7 @@ public class CameraManager : MonoBehaviour
 
     public float rotationSpeed;
 
-    private bool wasInPlayMode;
+    private bool uses3dCamera;
 
     private void Start()
     {
@@ -33,28 +33,28 @@ public class CameraManager : MonoBehaviour
 
     void Update()
     {
-        if (_gameManager.isPlaying != wasInPlayMode)
+        var use3dCamera = _gameManager.isPlaying && _gameManager.Is3dMapOn;
+        if (use3dCamera != uses3dCamera)
         {
-            CameraTypeChanged(_gameManager.isPlaying);
+            CameraTypeChanged(use3dCamera);
         }
-        if(_gameManager.isPlaying)
+        if(use3dCamera)
         {
-            HandleInGameCamera();
+            Handle3dCamera();
         }
         else
         {
-            HandleEditorCamera();
+            Handle2dCamera();
         }
     }
 
-    private void CameraTypeChanged(bool isPlayMode)
+    private void CameraTypeChanged(bool use3dCamera)
     {
-        wasInPlayMode= isPlayMode;
-        if (isPlayMode) {
+        uses3dCamera = use3dCamera;
+        if (use3dCamera) {
             Camera.main.orthographic = false;
             directionDegrees = 90;
             angleDegrees = 45;
-
         } else {
             // editor
             Camera.main.orthographic = true;
@@ -63,7 +63,7 @@ public class CameraManager : MonoBehaviour
         }
     }
 
-    private void HandleEditorCamera()
+    private void Handle2dCamera()
     {
         var currentMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
@@ -78,7 +78,7 @@ public class CameraManager : MonoBehaviour
         _lastMousePosition = currentMousePosition;
     }
 
-    private void HandleInGameCamera()
+    private void Handle3dCamera()
     {
 
         // Rotate camera (right mouse button)

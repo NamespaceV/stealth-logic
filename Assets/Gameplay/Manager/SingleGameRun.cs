@@ -72,7 +72,8 @@ namespace Assets.Gameplay.Manager
             }
 
             _map3d.Generate();
-            HideEditorMap();
+            
+            Toggle3dMap(_mgr.Is3dMapOn);
 
             if (_playerCoords.Count == 0) {
                 _gameEnded = true;
@@ -87,6 +88,21 @@ namespace Assets.Gameplay.Manager
         {
             _map3d.Clear();
             ShowEditorMap();
+        }
+
+        public void Toggle3dMap(bool turn3dOn)
+        {
+            Debug.Log("OnToggle3dMap" + turn3dOn);
+            if (turn3dOn)
+            {
+                HideEditorMap();
+                _map3d.Show();
+            }
+            else
+            {
+                ShowEditorMap();
+                _map3d.Hide();
+            }
         }
 
         private void HideEditorMap()

@@ -5,6 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Assets.Gameplay.Manager
 {
@@ -25,6 +26,8 @@ namespace Assets.Gameplay.Manager
 
         [SerializeField] private HUD _hud;
         private string _cleanLevelCopy;
+
+        public bool Is3dMapOn { get; private set; }
 
         private string LevelsPath => Application.dataPath + "../Levels";
 
@@ -47,6 +50,8 @@ namespace Assets.Gameplay.Manager
             {
                 genEmptyMap10x10();
             }
+
+            _hud.OnToggle3dMap += OnToggle3dMap;
         }
 
         private void genEmptyMap10x10()
@@ -107,6 +112,16 @@ namespace Assets.Gameplay.Manager
                 var tile = _grid.GetTile(coord);
                 var type = tile.GetOccupierTileType();
                 tile.SetTileOccupierType((TileOccupierType)(((int)type + 1) % 3));
+            }
+        }
+
+        public void OnToggle3dMap(bool turn3dOn)
+        {
+            Debug.Log($"GM 3d toggle on {Is3dMapOn}");
+            Is3dMapOn = turn3dOn;
+            if (isPlaying)
+            {
+                _singleGameRun.Toggle3dMap(turn3dOn);
             }
         }
 
@@ -273,13 +288,6 @@ namespace Assets.Gameplay.Manager
             _grid.Clear();
         }
 
-        private void HideGrid()
-        {
-            foreach (var f in _grid)
-            {
-                f.gameObject.SetActive(false);
-            }
-        }
 
         private void loadLevelData(LevelData data)
         {
@@ -314,10 +322,10 @@ namespace Assets.Gameplay.Manager
                 _cleanLevelCopy = JsonUtility.ToJson(serializeCurrentLevel());
 
                 isPlaying = true;
+                Debug.Log($"GM StartRun 3d  on {Is3dMapOn}");
+
                 _hud.StartPlay();
                 _singleGameRun.Init();
-
-                HideGrid();
 
             } else {
                 isPlaying = false;

@@ -31,11 +31,14 @@ public class HUD : MonoBehaviour
     
     [SerializeField] private RawImage _doorColorPicker;
 
+    [SerializeField] private Toggle _toggle3dMap;
 
     private List<Button> _toolboxButtons = new List<Button>();
     private List<bool> _toolboxButtonsSelected = new List<bool>();
     private int _selectedToolIdx = 0;
     private DoorColor _selectedDoorColor;
+
+    public event Action<bool> OnToggle3dMap;
 
     public ToolboxTool GetSelectedTool() { return (ToolboxTool)_selectedToolIdx; }
     public void SelectTool(ToolboxTool tool) { ToolClicked((int)tool); }
@@ -68,6 +71,11 @@ public class HUD : MonoBehaviour
         }
         _toolboxButtons.Clear();
         _toolboxButtonsSelected.Clear();
+    }
+
+    public void Toggle3dMap()
+    {
+        OnToggle3dMap?.Invoke(_toggle3dMap.isOn);
     }
 
     private void AddToolbox(string name)

@@ -110,5 +110,15 @@ namespace Gameplay.Manager.SingleRun
                 Object.Destroy(child.gameObject);
             }
         }
+
+        public void Hide()
+        {
+            LevelParent.SetActive(false);
+        }
+
+        public void Show()
+        {
+            LevelParent.SetActive(true);
+        }
     }
 }
