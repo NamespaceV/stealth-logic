@@ -111,7 +111,7 @@ namespace Assets.Gameplay.Manager
             {
                 var tile = _grid.GetTile(coord);
                 var type = tile.GetOccupierTileType();
-                tile.SetTileOccupierType((TileOccupierType)(((int)type + 1) % 3));
+                tile.SetTileOccupierType((TileOccupierType)(((int)type + 1) % 3), null);
             }
         }
 
@@ -143,25 +143,25 @@ namespace Assets.Gameplay.Manager
                 switch (_hud.GetSelectedTool()) {
                     case ToolboxTool.ENEMY:
                         if (dir.Value == Direction.Up) { 
-                            tile.SetTileOccupierType(TileOccupierType.ENEMY);
+                            tile.SetTileOccupierType(TileOccupierType.ENEMY, null);
                         }
                         else if (dir.Value == Direction.Down)
                         {
                             if (tile.GetOccupierTileType() == TileOccupierType.ENEMY){
-                                tile.SetTileOccupierType(TileOccupierType.EMPTY);
+                                tile.SetTileOccupierType(TileOccupierType.EMPTY, null);
                             }
                         }
                         break;
                     case ToolboxTool.HERO:
                         if (dir.Value == Direction.Up)
                         {
-                            tile.SetTileOccupierType(TileOccupierType.HERO);
+                            tile.SetTileOccupierType(TileOccupierType.HERO, null);
                         }
                         else if (dir.Value == Direction.Down)
                         {
                             if (tile.GetOccupierTileType() == TileOccupierType.HERO)
                             {
-                                tile.SetTileOccupierType(TileOccupierType.EMPTY);
+                                tile.SetTileOccupierType(TileOccupierType.EMPTY, null);
                             }
                         }
                         break;

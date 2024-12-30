@@ -25,7 +25,7 @@ namespace Gameplay.Manager.SingleRun
 
         private Tile _myTile => _mgr.GetGrid().GetTile(_coord);
 
-        public void Move()
+        public void Move(ButtonsState buttonsState)
         {
             _lastSeenInCurrentTurn = false;
 
@@ -38,12 +38,12 @@ namespace Gameplay.Manager.SingleRun
                 if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     _currentRun.PlayerLost();
-                    moveTo(adjacent);
+                    moveTo(adjacent, buttonsState);
                     return;
                 }
                 if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
                 
-                moveTo(adjacent);
+                moveTo(adjacent, buttonsState);
                 _lastSeenDistance -= 1;
                 if (_lastSeenDistance == 0)
                 {
@@ -88,11 +88,11 @@ namespace Gameplay.Manager.SingleRun
             }
         }
 
-        private void moveTo(Tile adjacent)
+        private void moveTo(Tile adjacent, ButtonsState buttonsState)
         {
-            _myTile.SetTileOccupierType(TileOccupierType.EMPTY);
+            _myTile.SetTileOccupierType(TileOccupierType.EMPTY, buttonsState);
             _myTile.MoveObjectToTile(adjacent);
-            adjacent.SetTileOccupierType(TileOccupierType.ENEMY);
+            adjacent.SetTileOccupierType(TileOccupierType.ENEMY, buttonsState);
             _coord = adjacent.GetCoords();
         }
     }

@@ -19,6 +19,7 @@ namespace Assets.Gameplay.Manager
         private List<Vector2Int> _playerCoords = new List<Vector2Int>();
         private int _selectedPlayerIdx = 0;
         private List<EnemyState> _enemies = new List<EnemyState>();
+        private ButtonsState _buttonsState = new ButtonsState();
 
         [Header("Map")]
         [SerializeField] private GameObject LevelParent;
@@ -61,13 +62,25 @@ namespace Assets.Gameplay.Manager
 
             foreach (var tile in _mgr.GetGrid())
             {
-                if (tile.GetOccupierTileType() == TileOccupierType.HERO)
+                var occupier = tile.GetOccupierTileType();
+                var coords = tile.GetCoords();
+                if ( occupier == TileOccupierType.HERO)
                 {
-                    _playerCoords.Add(tile.GetCoords());
+                    _playerCoords.Add(coords);
                 }
-                else if (tile.GetOccupierTileType() == TileOccupierType.ENEMY)
+                else if (occupier == TileOccupierType.ENEMY)
                 {
-                    _enemies.Add(new EnemyState(_mgr, this, tile.GetCoords()));
+                    _enemies.Add(new EnemyState(_mgr, this, coords));
+                }
+
+                var buttonColor = tile.GetButtonColor();
+                if (buttonColor.HasValue)
+                {
+                    _buttonsState.RegisterButton(buttonColor.Value, coords);
+                    if (occupier != TileOccupierType.EMPTY)
+                    {
+                        _buttonsState.ButtonPressed(buttonColor.Value, coords);
+                    }
                 }
             }
 
@@ -148,10 +161,10 @@ namespace Assets.Gameplay.Manager
                 {
                     targetTile.OnTileInteractable.Interact(this, playerCoords);
                 }
-                playerTile.SetTileOccupierType(TileOccupierType.EMPTY);
+                playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
                 playerTile.MoveObjectToTile(targetTile);
                 playerTile.SetSelected(false);
-                targetTile.SetTileOccupierType(TileOccupierType.HERO);
+                targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
                 targetTile.SetSelected(true);
                 _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
                 moveEnemies();
@@ -168,7 +181,7 @@ namespace Assets.Gameplay.Manager
         private void moveEnemies()
         {
             foreach (var e in _enemies) {
-                e.Move();
+                e.Move(_buttonsState);
             }
         }
 
@@ -190,7 +203,7 @@ namespace Assets.Gameplay.Manager
                 _playerCoords.Remove(coord);
                 var t = _mgr.GetGrid().GetTile(coord);
                 t.SetSelected(false);
-                t.SetTileOccupierType(TileOccupierType.EMPTY);
+                t.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
                 t.RemoveCurrentObject();
             }
             if (_playerCoords.Count == 0)

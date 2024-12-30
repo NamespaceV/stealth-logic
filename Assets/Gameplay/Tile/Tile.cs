@@ -2,6 +2,7 @@ using Assets.Common.Scripts;
 using Assets.Gameplay.Manager;
 using System;
 using System.Collections.Generic;
+using Gameplay.Manager.SingleRun;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -61,7 +62,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     public void ReadFromData(TileData tileData)
     {
-        SetTileOccupierType(tileData.Type);
+        SetTileOccupierType(tileData.Type, null);
         SetFloorType(tileData.Floor);
         _buttonColor = tileData.HasButton ? tileData.ButtonColor : null;
         UpdateButtonSprite();
@@ -132,11 +133,22 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void SetTileOccupierType(TileOccupierType type)
+    public void SetTileOccupierType(TileOccupierType type, [CanBeNull] ButtonsState buttonsState)
     {
         _occupierType = type;
         PlayerVisualisation.SetActive(type == TileOccupierType.HERO);
         EnemyVisualisation.SetActive(type == TileOccupierType.ENEMY);
+        if (_buttonColor.HasValue && buttonsState != null)
+        {
+            if (type == TileOccupierType.EMPTY)
+            {
+                buttonsState.ButtonReleased(_buttonColor.Value, _coord);
+            }
+            else
+            {
+                buttonsState.ButtonPressed(_buttonColor.Value, _coord);
+            }
+        }
     }
 
 
