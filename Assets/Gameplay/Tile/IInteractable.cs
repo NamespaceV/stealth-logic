@@ -5,5 +5,5 @@ using UnityEngine;
 
 public interface IInteractable
 {
-    public void Interact(SingleGameRun gameRun, Vector2Int coord);
+    public bool TryInteract(SingleGameRun gameRun, Vector2Int coord);
 }

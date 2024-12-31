@@ -1,5 +1,6 @@
 ﻿using Assets.Common.Scripts;
 using Assets.Gameplay.Manager;
+using Settings;
 using UnityEngine;
 
 namespace Gameplay.Manager.SingleRun
@@ -9,33 +10,17 @@ namespace Gameplay.Manager.SingleRun
         private GameManager _mgr;
 
         private GameObject LevelParent;
-        private GameObject FloorTilePrefab;
-        private GameObject FloorWaterTilePrefab;
-        private GameObject WallTilePrefab;
-        private GameObject PlayerPrefab;
-        private GameObject EnemyPrefab;
-        private Sprite ExitSprite;
-        private readonly GameObject _buttonPrefab;
 
-        public Map3dManager(GameManager mgr,
+        private readonly GameConfigSO _config;
+
+        public Map3dManager(
+            GameManager mgr,
             GameObject levelParent,
-            GameObject floorTilePrefab,
-            GameObject floorWaterTilePrefab,
-            GameObject wallTilePrefab,
-            GameObject playerPrefab,
-            GameObject enemyPrefab,
-            Sprite exitSprite,
-            GameObject buttonPrefab)
+            GameConfigSO config)
         {
             _mgr = mgr;
             LevelParent = levelParent;
-            FloorTilePrefab = floorTilePrefab;
-            FloorWaterTilePrefab = floorWaterTilePrefab;
-            WallTilePrefab = wallTilePrefab;
-            PlayerPrefab = playerPrefab;
-            EnemyPrefab = enemyPrefab;
-            ExitSprite = exitSprite;
-            _buttonPrefab = buttonPrefab;
+            _config = config;
         }
 
         public void Generate()
@@ -48,14 +33,14 @@ namespace Gameplay.Manager.SingleRun
                 for (int x = 0; x < _mgr.mapWidth; x++)
                 {
                     var tile = grid.GetTile(new Vector2Int(x, y));
-                    var prefab = tile.FloorType == TileFloorType.WATER ? FloorWaterTilePrefab : FloorTilePrefab;
+                    var prefab = tile.FloorType == TileFloorType.WATER ? _config.FloorWaterTilePrefab : _config.FloorTilePrefab;
                     GameObject floor = Object.Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
                     floor.transform.SetParent(LevelParent.transform);
                     tile.SetFloor3D(floor);
                     var buttonColor = tile.GetButtonColor();
                     if (buttonColor.HasValue)
                     {
-                        var button = Object.Instantiate(_buttonPrefab, new Vector3(x, 0.01f, y), Quaternion.identity, floor.gameObject.transform);
+                        var button = Object.Instantiate(_config.ButtonPrefab, new Vector3(x, 0.01f, y), Quaternion.identity, floor.gameObject.transform);
                         button.GetComponentInChildren<SpriteRenderer>().color = Wall.FromColor(buttonColor.Value);
                     }
                 }
@@ -70,12 +55,12 @@ namespace Gameplay.Manager.SingleRun
                     case TileOccupierType.EMPTY:
                         break;
                     case TileOccupierType.ENEMY:
-                        GameObject enemy = Object.Instantiate(EnemyPrefab, tile.Pos, Quaternion.identity);
+                        GameObject enemy = Object.Instantiate(_config.EnemyPrefab, tile.Pos, Quaternion.identity);
                         enemy.transform.SetParent(LevelParent.transform);
                         tile.currentObject = enemy;
                         break;
                     case TileOccupierType.HERO:
-                        GameObject player = Object.Instantiate(PlayerPrefab, tile.Pos, Quaternion.identity);
+                        GameObject player = Object.Instantiate(_config.PlayerPrefab, tile.Pos, Quaternion.identity);
                         player.transform.SetParent(LevelParent.transform);
                         tile.currentObject = player;
                         break;
@@ -96,9 +81,9 @@ namespace Gameplay.Manager.SingleRun
         {
             if (tile.HasWall(dir))
             {
-                GameObject wall = Object.Instantiate(WallTilePrefab, tile.Pos, rotation);
+                GameObject wall = Object.Instantiate(_config.WallTilePrefab, tile.Pos, rotation);
                 if (tile.GetWall(dir).IsExit)
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = ExitSprite;
+                    wall.GetComponentInChildren<SpriteRenderer>().sprite = _config.ExitSprite;
                 wall.transform.SetParent(LevelParent.transform);
             }
         }

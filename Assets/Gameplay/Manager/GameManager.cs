@@ -1,5 +1,6 @@
 ﻿using Assets.Common.Scripts;
 using System.IO;
+using Settings;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -9,15 +10,15 @@ using UnityEngine.Serialization;
 
 namespace Assets.Gameplay.Manager
 {
-    [RequireComponent(typeof(SingleGameRun))]
     public class GameManager :  MonoBehaviour
     {
         public static GameManager Instance;
+        public GameConfigSO gameConfig;
+        public GameObject LevelParent;
 
         public int mapWidth = 10;
         public int mapHeight = 10;
 
-        public GameObject TilePrefab;
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
@@ -34,8 +35,6 @@ namespace Assets.Gameplay.Manager
         private void Awake()
         {
             Instance = this;
-            _singleGameRun = GetComponent<SingleGameRun>();
-            _singleGameRun.SetHud(_hud);
         }
 
         public void Start()
@@ -61,7 +60,7 @@ namespace Assets.Gameplay.Manager
                 for (int y = 0; y < mapHeight; ++y)
                 {
                     var coord = new Vector2Int(x, y);
-                    var go = Instantiate(TilePrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
+                    var go = Instantiate(gameConfig.Tile2DPrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
                     var tile = go.GetComponent<Tile>();
                     tile.Register(this, coord);
                     _grid.SetTile(coord, tile);
@@ -301,7 +300,7 @@ namespace Assets.Gameplay.Manager
                 for (int y = 0; y < data.Size.y; ++y)
                 {
                     var coord = new Vector2Int(x, y);
-                    var go = Instantiate(TilePrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
+                    var go = Instantiate(gameConfig.Tile2DPrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
                     var tile = go.GetComponent<Tile>();
                     tile.ReadFromData(data.Tiles[x][y]);
                     tile.Register(this, coord);
@@ -325,12 +324,14 @@ namespace Assets.Gameplay.Manager
                 Debug.Log($"GM StartRun 3d  on {Is3dMapOn}");
 
                 _hud.StartPlay();
+                _singleGameRun = new SingleGameRun(this, LevelParent, gameConfig, _hud);
                 _singleGameRun.Init();
 
             } else {
                 isPlaying = false;
                 _hud.EndPlay();
                 _singleGameRun.Quit();
+                _singleGameRun = null;
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
                 loadLevelData(cleanLevel);
             }

@@ -44,6 +44,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public GameObject currentObject;
     [SerializeField] private bool _selected;
     [SerializeField] private GameObject _floor3d;
+    private GameObject _floor3dSelectionMeshGO;
 
     public TileFloorType FloorType { get => _floorType; set => SetFloorType(value); }
 
@@ -126,10 +127,9 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         _selected = val;
         Background.color = val ? Color.red : Color.white;
-        if (_floor3d != null)
+        if (_floor3dSelectionMeshGO != null)
         {
-            var selection = _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive:true)?.gameObject;
-            selection?.SetActive(_selected);
+            _floor3dSelectionMeshGO?.SetActive(_selected);
         }
     }
 
@@ -162,12 +162,14 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         return _occupierType;
     }
 
-    public void TryInteract(Direction direction, SingleGameRun currentRun)
+    public bool TryInteract(Direction direction, SingleGameRun currentRun)
     {
         if (Interactables.ContainsKey(direction))
         {
-            Interactables[direction].Interact(currentRun, _coord);
+            return Interactables[direction].TryInteract(currentRun, _coord);
         }
+
+        return false;
     }
 
     public Vector2Int GetCoords()
@@ -175,7 +177,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         return _coord;
     }
 
-    public bool HasWall(Direction dir) => Walls[(int)dir].Exists;
+    public bool HasWall(Direction dir) => Walls[(int)dir].BlocksMovement();
 
     public bool AllowsMove(Direction dir)
     {
@@ -209,7 +211,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     public void SetFloor3D(GameObject floor3d)
     {
         _floor3d = floor3d;
-        _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive: true)?.gameObject.SetActive(_selected);
+        _floor3dSelectionMeshGO = _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive: true)?.gameObject;
+        _floor3dSelectionMeshGO.SetActive(_selected);
     }
 
     public void ToggleButton(DoorColor buttonColor)
@@ -226,6 +229,14 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         if (_buttonColor.HasValue)
         {
             ButtonVisualisation.color = Wall.FromColor(_buttonColor.Value);
+        }
+    }
+
+    public void UpdateDoors(ButtonsState buttonsState)
+    {
+        for (var dir = 0; dir < 4; ++dir)
+        {
+            Walls[(int)dir].UpdateDoor(buttonsState);
         }
     }
 }

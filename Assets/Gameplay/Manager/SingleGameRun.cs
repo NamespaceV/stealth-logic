@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Gameplay.Manager.SingleRun;
+using Settings;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -9,7 +10,7 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Gameplay.Manager
 {
-    public class SingleGameRun : MonoBehaviour
+    public class SingleGameRun
     {
         private GameManager _mgr;
         private Map3dManager _map3d;
@@ -21,36 +22,16 @@ namespace Assets.Gameplay.Manager
         private List<EnemyState> _enemies = new List<EnemyState>();
         private ButtonsState _buttonsState = new ButtonsState();
 
-        [Header("Map")]
-        [SerializeField] private GameObject LevelParent;
-        [SerializeField] private GameObject FloorTilePrefab;
-        [SerializeField] private GameObject FloorWaterTilePrefab;
-        [SerializeField] private GameObject WallTilePrefab;
-        [SerializeField] private GameObject PlayerPrefab;
-        [SerializeField] private GameObject EnemyPrefab;
-        [SerializeField] private Sprite ExitSprite;
-        [SerializeField] private GameObject ButtonPrefab;
-
         private HUD _hud;
 
-        private void Start()
+        public SingleGameRun(GameManager mgr, GameObject levelParent, GameConfigSO config, HUD hud)
         {
-            _mgr = GameManager.Instance;
+            _mgr = mgr;
+            _hud = hud;
             _map3d = new Map3dManager(
                 _mgr,
-                LevelParent,
-                FloorTilePrefab,
-                FloorWaterTilePrefab,
-                WallTilePrefab,
-                PlayerPrefab,
-                EnemyPrefab,
-                ExitSprite,
-                ButtonPrefab);
-        }
-
-        internal void SetHud(HUD hud)
-        {
-            _hud = hud;
+                levelParent,
+                config);
         }
 
         public void Init()
@@ -154,27 +135,37 @@ namespace Assets.Gameplay.Manager
             var playerTile = g.GetTile(playerCoords);
             var targetTile = g.GetAdjacentTile(playerCoords, dir.Value);
 
-            if (targetTile?.GetOccupierTileType() == TileOccupierType.EMPTY
-                    && playerTile.AllowsMove(dir.Value))
+            if (targetTile?.GetOccupierTileType() != TileOccupierType.EMPTY
+                || !playerTile.AllowsMove(dir.Value))
             {
-                if (targetTile.OnTileInteractable != null)
+                if (playerTile.TryInteract(dir.Value, this))
                 {
-                    targetTile.OnTileInteractable.Interact(this, playerCoords);
+                    moveEnemies();
+                    updateDoors();
                 }
-                playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
-                playerTile.MoveObjectToTile(targetTile);
-                playerTile.SetSelected(false);
-                targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
-                targetTile.SetSelected(true);
-                _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
-                moveEnemies();
+                return;
             }
-            else
+            
+            if (targetTile.OnTileInteractable != null)
             {
-                if (dir != null && playerTile != null)
-                {
-                    playerTile.TryInteract(dir.Value, this);
-                }
+                targetTile.OnTileInteractable.TryInteract(this, playerCoords);
+            }
+
+            playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
+            playerTile.MoveObjectToTile(targetTile);
+            playerTile.SetSelected(false);
+            targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
+            targetTile.SetSelected(true);
+            _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
+            moveEnemies();
+            updateDoors();
+        }
+
+        private void updateDoors()
+        {
+            foreach (var tile in _mgr.GetGrid())
+            {
+                tile.UpdateDoors(_buttonsState);
             }
         }
 

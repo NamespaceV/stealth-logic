@@ -955,9 +955,9 @@ RectTransform:
   - {fileID: 1331052996}
   m_Father: {fileID: 1091730263}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -337, y: 248}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 89.899994, y: -47.100006}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &814941172
@@ -2191,7 +2191,6 @@ GameObject:
   - component: {fileID: 1708159275}
   - component: {fileID: 1708159274}
   - component: {fileID: 1708159276}
-  - component: {fileID: 1708159277}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2211,9 +2210,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e25a9632ef795044988901721317f354, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameConfig: {fileID: 11400000, guid: ba96caadf610d8d489a8184fb0212a84, type: 2}
+  LevelParent: {fileID: 1587948793}
   mapWidth: 10
   mapHeight: 10
-  TilePrefab: {fileID: 5265387176146853900, guid: 9a4f3c65cd8cc144189773b478a969bc, type: 3}
   _hud: {fileID: 1091730264}
 --- !u!4 &1708159275
 Transform:
@@ -2260,26 +2260,6 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 519420031}
---- !u!114 &1708159277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1708159273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7e48acbb47827c4d9e4aae271809b84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  LevelParent: {fileID: 1587948793}
-  FloorTilePrefab: {fileID: 410553896753926156, guid: 0cc9ab5a63855b147a63fd43ef886ce3, type: 3}
-  FloorWaterTilePrefab: {fileID: 410553896753926156, guid: 75f3c26df1fc7264cba174d47d60e08c, type: 3}
-  WallTilePrefab: {fileID: 4543977208508056312, guid: c4feca87208a3ba47a8a16c074b8475a, type: 3}
-  PlayerPrefab: {fileID: 8934367735989853692, guid: a5dd139018452874bb316db507774930, type: 3}
-  EnemyPrefab: {fileID: 6559972464492696789, guid: 93ab80e87d975fb40bea07a5dbd5c7cc, type: 3}
-  ExitSprite: {fileID: 1692759999, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
-  ButtonPrefab: {fileID: 410553896753926156, guid: dba50b35b9efa4d42bdfc6a1cb3b092f, type: 3}
 --- !u!1 &1749212530
 GameObject:
   m_ObjectHideFlags: 0

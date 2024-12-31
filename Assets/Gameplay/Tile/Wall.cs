@@ -2,6 +2,7 @@ using Assets.Gameplay.Manager;
 using System.Collections;
 using System.Collections.Generic;
 using Assets.Common.Scripts;
+using Gameplay.Manager.SingleRun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -41,6 +42,7 @@ public class Wall : MonoBehaviour, IInteractable
 
     private DoorType _doorType;
     private DoorColor _doorColor;
+    private bool _isOpen;
 
     private Color _defaultColor;
     private Color _exitColor = Color.cyan;
@@ -61,6 +63,32 @@ public class Wall : MonoBehaviour, IInteractable
     private void Start()
     {
         _gameManager = GameManager.Instance;
+    }
+    
+    public void UpdateDoor(ButtonsState buttonsState)
+    {
+        switch (_doorType)
+        {
+            case DoorType.DOOR: 
+                _isOpen = buttonsState.IsAnyButtonPressed(_doorColor); 
+                break;
+            case DoorType.GATE_SINGLE:
+                _isOpen = buttonsState.AreAllButtonsPressed(_doorColor); 
+                break;
+            case DoorType.GATE_RAINBOW:
+                _isOpen = buttonsState.AreAllColorsPressed(); 
+                break;
+        }
+
+        if (_doorType != DoorType.NONE && _doorType != DoorType.EXIT)
+        {
+            _doorOpeningSprite.gameObject.SetActive(_isOpen);
+        }
+    }
+    
+    public bool BlocksMovement()
+    {
+        return Exists && !_isOpen;
     }
 
     private void UpdateWallSprites()
@@ -124,12 +152,15 @@ public class Wall : MonoBehaviour, IInteractable
     }
 
 
-    public void Interact(SingleGameRun gameRun, Vector2Int coord)
+    public bool TryInteract(SingleGameRun gameRun, Vector2Int coord)
     {
         if(IsExit)
         {
             gameRun.Escape(coord);
+            return true;
         }
+
+        return false;
     }
 
     public void ReadFromData(WallData wallData)
