@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Assets.Common.Scripts
 {
@@ -35,6 +36,8 @@ namespace Assets.Common.Scripts
         public List<WallData> WallsData = new List<WallData>(4);
         public bool HasButton; //Unity doesn't serialize DoorColor? so split into 2 fields
         public DoorColor ButtonColor;
+        [FormerlySerializedAs("HasTeleport")] public bool HasPortal; //Unity doesn't serialize DoorColor? so split into 2 fields
+        [FormerlySerializedAs("TeleportColor")] public DoorColor PortalColor;
 
         public void Migrate()
         {

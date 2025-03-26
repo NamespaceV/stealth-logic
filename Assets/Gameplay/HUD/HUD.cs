@@ -15,6 +15,8 @@ public enum ToolboxTool {
     GATE,
     RAINBOWGATE,
     BUTTON,
+    STONE,
+    PORTAL,
 }
 
 public class HUD : MonoBehaviour
@@ -58,6 +60,8 @@ public class HUD : MonoBehaviour
         AddToolbox("Gate");
         AddToolbox("Rainbow Gate");
         AddToolbox("Button");
+        AddToolbox("Stone");
+        AddToolbox("Portal");
 
         ToggleToolboxButton(_selectedToolIdx);
 

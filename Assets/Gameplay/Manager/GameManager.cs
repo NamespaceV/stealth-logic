@@ -164,6 +164,19 @@ namespace Assets.Gameplay.Manager
                             }
                         }
                         break;
+                    case ToolboxTool.STONE:
+                        if (dir.Value == Direction.Up)
+                        {
+                            tile.SetTileOccupierType(TileOccupierType.STONE, null);
+                        }
+                        else if (dir.Value == Direction.Down)
+                        {
+                            if (tile.GetOccupierTileType() == TileOccupierType.STONE)
+                            {
+                                tile.SetTileOccupierType(TileOccupierType.EMPTY, null);
+                            }
+                        }
+                        break;             
                      case ToolboxTool.WATER:
                         if (dir.Value == Direction.Up)
                         {
@@ -205,7 +218,16 @@ namespace Assets.Gameplay.Manager
                             _hud.ToggleSelectedButtonColor(dir.Value == Direction.Right);
                         }
                         break;
-
+                    case ToolboxTool.PORTAL:
+                        if (dir.Value == Direction.Up)
+                        {
+                            tile.TogglePortal(_hud.GetSelectedDoorColor());
+                        }
+                        else if (dir.Value == Direction.Down)
+                        {
+                            _hud.ToggleSelectedButtonColor(dir.Value == Direction.Right);
+                        }
+                        break;      
                 }
             }
         }

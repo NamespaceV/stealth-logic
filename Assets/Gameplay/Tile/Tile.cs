@@ -13,12 +13,14 @@ public enum TileOccupierType
     EMPTY,
     ENEMY,
     HERO,
+    STONE,
 }
 
 public enum TileFloorType
 {
     EMPTY,
     WATER,
+    PORTAL,
 }
 
 public class Tile : MonoBehaviour, IPointerClickHandler
@@ -26,8 +28,10 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     [SerializeField] private SpriteRenderer Background;
     [SerializeField] private GameObject     PlayerVisualisation;
     [SerializeField] private GameObject     EnemyVisualisation;
+    [SerializeField] private GameObject     StoneVisualisation;
     [SerializeField] private GameObject     WaterVisualisation;
     [SerializeField] private SpriteRenderer ButtonVisualisation;
+    [SerializeField] private SpriteRenderer PortalVisualisation;
 
 
     public IInteractable OnTileInteractable;
@@ -40,6 +44,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     private TileOccupierType _occupierType;
     private TileFloorType _floorType;
     private DoorColor? _buttonColor;
+    private DoorColor? _portalColor;
     private int _heroCount;
     public GameObject currentObject;
     [SerializeField] private bool _selected;
@@ -66,7 +71,9 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         SetTileOccupierType(tileData.Type, null);
         SetFloorType(tileData.Floor);
         _buttonColor = tileData.HasButton ? tileData.ButtonColor : null;
+        _portalColor = tileData.HasPortal ? tileData.PortalColor : null;
         UpdateButtonSprite();
+        UpdatePortalSprite();
         for (int i = 0; i < 4; ++i)
         {
             Walls[i].ReadFromData(tileData.WallsData[i]);
@@ -82,6 +89,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         if (_buttonColor.HasValue)
         {
             result.ButtonColor = _buttonColor.Value;
+        }
+        result.HasPortal = _portalColor.HasValue;
+        if (_portalColor.HasValue)
+        {
+            result.PortalColor = _portalColor.Value;
         }
         result.HeroCount = _heroCount;
         for (int i = 0; i < 4; ++i)
@@ -138,6 +150,8 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _occupierType = type;
         PlayerVisualisation.SetActive(type == TileOccupierType.HERO);
         EnemyVisualisation.SetActive(type == TileOccupierType.ENEMY);
+        StoneVisualisation.SetActive(type == TileOccupierType.STONE);
+
         if (_buttonColor.HasValue && buttonsState != null)
         {
             if (type == TileOccupierType.EMPTY)
@@ -156,6 +170,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         _floorType = value;
         WaterVisualisation.SetActive(_floorType == TileFloorType.WATER);
+        PortalVisualisation.gameObject.SetActive(_portalColor != null);
     }
 
     public TileOccupierType GetOccupierTileType(){
@@ -220,6 +235,22 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _buttonColor = _buttonColor != buttonColor ? buttonColor : null;
         UpdateButtonSprite();
     }
+    
+    
+    public void TogglePortal(DoorColor portalColor)
+    {
+        _portalColor = _portalColor != portalColor ? portalColor : null;
+        UpdatePortalSprite();
+    }
+
+    private void UpdatePortalSprite()
+    {
+        PortalVisualisation.gameObject.SetActive(_portalColor != null);
+        if (_portalColor !=  null)
+        {
+            PortalVisualisation.color = Wall.FromColor(_portalColor.Value);
+        }
+    }
 
     public DoorColor? GetButtonColor() => _buttonColor; 
 
@@ -239,4 +270,5 @@ public class Tile : MonoBehaviour, IPointerClickHandler
             Walls[(int)dir].UpdateDoor(buttonsState);
         }
     }
+
 }
