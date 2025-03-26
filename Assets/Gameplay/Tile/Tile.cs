@@ -72,6 +72,11 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         SetFloorType(tileData.Floor);
         _buttonColor = tileData.HasButton ? tileData.ButtonColor : null;
         _portalColor = tileData.HasPortal ? tileData.PortalColor : null;
+        if (_portalColor != null)
+        {
+            SetFloorType(TileFloorType.PORTAL);
+        }
+
         UpdateButtonSprite();
         UpdatePortalSprite();
         for (int i = 0; i < 4; ++i)
@@ -253,7 +258,9 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public DoorColor? GetButtonColor() => _buttonColor; 
+    public DoorColor? GetButtonColor() => _buttonColor;
+
+    public DoorColor? GetPortalColor() => _portalColor;
 
     private void UpdateButtonSprite()
     {

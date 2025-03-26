@@ -17,10 +17,10 @@ public enum DoorType
 
 public enum DoorColor
 {
-    COLOR_1,
-    COLOR_2,
-    COLOR_3,
-    COLOR_4,
+    COLOR_0_RED,
+    COLOR_1_GREEN,
+    COLOR_2_BLUE,
+    COLOR_3_VIOLET,
 }
 
 public class Wall : MonoBehaviour, IInteractable

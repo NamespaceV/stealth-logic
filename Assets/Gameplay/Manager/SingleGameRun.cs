@@ -21,6 +21,7 @@ namespace Assets.Gameplay.Manager
         private int _selectedPlayerIdx = 0;
         private List<EnemyState> _enemies = new List<EnemyState>();
         private ButtonsState _buttonsState = new ButtonsState();
+        private PortalsState _portalsState = new PortalsState(); 
 
         private HUD _hud;
 
@@ -63,6 +64,11 @@ namespace Assets.Gameplay.Manager
                         _buttonsState.ButtonPressed(buttonColor.Value, coords);
                     }
                 }
+                var portalColor = tile.GetPortalColor();
+                if (portalColor.HasValue)
+                {
+                    _portalsState.RegisterPortal(portalColor.Value, coords);
+                }
             }
 
             _map3d.Generate();
@@ -72,6 +78,13 @@ namespace Assets.Gameplay.Manager
             if (_playerCoords.Count == 0) {
                 _gameEnded = true;
                 _hud.SetMainMessage("NO PLAYER ON THE LEVEL");
+                return;
+            }
+
+            if (!_portalsState.IsValid(out var errorMessage))
+            {
+                _gameEnded = true;
+                _hud.SetMainMessage(errorMessage);
                 return;
             }
 
@@ -167,6 +180,21 @@ namespace Assets.Gameplay.Manager
             playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
             playerTile.MoveObjectToTile(targetTile);
             playerTile.SetSelected(false);
+            if (targetTile.FloorType == TileFloorType.PORTAL)
+            {
+                var otherPortalCoords = _portalsState.GetOtherPortalCoords(targetTile.GetPortalColor().Value, targetTile.GetCoords());
+                var otherPortalTile = g.GetTile(otherPortalCoords);
+                if (otherPortalTile?.GetOccupierTileType() == TileOccupierType.EMPTY)
+                {
+                    otherPortalTile.SetSelected(true);
+                    otherPortalTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
+                    _playerCoords[_selectedPlayerIdx] = otherPortalTile.GetCoords();
+                    moveEnemies();
+                    updateDoors();
+                    return;
+                }
+            }
+            
             targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
             targetTile.SetSelected(true);
             _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
