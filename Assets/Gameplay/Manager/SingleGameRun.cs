@@ -178,7 +178,6 @@ namespace Assets.Gameplay.Manager
             }
 
             playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
-            playerTile.MoveObjectToTile(targetTile);
             playerTile.SetSelected(false);
             if (targetTile.FloorType == TileFloorType.PORTAL)
             {
@@ -186,6 +185,7 @@ namespace Assets.Gameplay.Manager
                 var otherPortalTile = g.GetTile(otherPortalCoords);
                 if (otherPortalTile?.GetOccupierTileType() == TileOccupierType.EMPTY)
                 {
+                    playerTile.MoveObjectToTile(otherPortalTile);
                     otherPortalTile.SetSelected(true);
                     otherPortalTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
                     _playerCoords[_selectedPlayerIdx] = otherPortalTile.GetCoords();
@@ -194,7 +194,7 @@ namespace Assets.Gameplay.Manager
                     return;
                 }
             }
-            
+            playerTile.MoveObjectToTile(targetTile);
             targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
             targetTile.SetSelected(true);
             _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
