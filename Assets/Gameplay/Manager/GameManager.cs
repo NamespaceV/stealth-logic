@@ -1,4 +1,5 @@
-﻿using Assets.Common.Scripts;
+﻿using System.Collections.Generic;
+using Assets.Common.Scripts;
 using System.IO;
 using Settings;
 using TMPro;
@@ -30,7 +31,9 @@ namespace Assets.Gameplay.Manager
 
         public bool Is3dMapOn { get; private set; }
 
-        private string LevelsPath => Application.dataPath + "../Levels";
+        private string LevelsPath => Application.dataPath + "Levels";
+
+        public List<TextAsset> LevelFiles = new();
 
         private void Awake()
         {
@@ -40,7 +43,7 @@ namespace Assets.Gameplay.Manager
         public void Start()
         {
             var lastLevelPath = PlayerPrefs.GetString("LastLevelOpened");
-            if (!string.IsNullOrEmpty(lastLevelPath)) {
+            if (!string.IsNullOrEmpty(lastLevelPath) && File.Exists(lastLevelPath)) {
                 var fileText = File.ReadAllText(lastLevelPath);
                 var data = JsonUtility.FromJson<LevelData>(fileText);
                 loadLevelData(data);
@@ -297,7 +300,12 @@ namespace Assets.Gameplay.Manager
                initialPath: LevelsPath,
                initialFilename: "level.json",
                title: "Select File", loadButtonText: "Select");
-           
+        }
+
+        public void ShowLevels()
+        {
+            var data = JsonUtility.FromJson<LevelData>(LevelFiles[0].text);
+            loadLevelData(data);
         }
 
         private void ClearGrid()
