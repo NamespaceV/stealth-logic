@@ -212,6 +212,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     public void MoveObjectToTile(Tile targetTile)
     {
+        if (currentObject == null) return;
         currentObject.transform.position = targetTile.Pos;
         targetTile.currentObject = currentObject;
         currentObject = null;

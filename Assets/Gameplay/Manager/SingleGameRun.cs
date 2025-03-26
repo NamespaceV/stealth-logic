@@ -135,6 +135,19 @@ namespace Assets.Gameplay.Manager
             var playerTile = g.GetTile(playerCoords);
             var targetTile = g.GetAdjacentTile(playerCoords, dir.Value);
 
+            if (targetTile?.GetOccupierTileType() == TileOccupierType.STONE)
+            {
+                var afterStoneTile = g.GetAdjacentTile(targetTile.GetCoords(), dir.Value);
+                if (afterStoneTile?.GetOccupierTileType() == TileOccupierType.EMPTY
+                    && playerTile.AllowsMove(dir.Value)
+                    && targetTile.AllowsMove(dir.Value))
+                {
+                    targetTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
+                    afterStoneTile.SetTileOccupierType(TileOccupierType.STONE, _buttonsState);
+                    targetTile.MoveObjectToTile(afterStoneTile);
+                }
+            }
+
             if (targetTile?.GetOccupierTileType() != TileOccupierType.EMPTY
                 || !playerTile.AllowsMove(dir.Value))
             {
