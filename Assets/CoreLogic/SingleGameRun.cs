@@ -1,58 +1,63 @@
 ﻿using Assets.Common.Scripts;
-using System;
 using System.Collections.Generic;
 using Gameplay.Manager.SingleRun;
-using Settings;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Assets.Gameplay.Manager
 {
+    public enum GameState
+    {
+        PLAYING,
+        ERROR,
+        WON,
+        LOST,
+    }
+
     public class SingleGameRun
     {
-        private GameManager _mgr;
-        private Map3dManager _map3d;
-
-        private bool _gameEnded;
+        public GameState GameState { get; private set; }
 
         private List<Vector2Int> _playerCoords = new List<Vector2Int>();
-        private int _selectedPlayerIdx = 0;
         private List<EnemyState> _enemies = new List<EnemyState>();
         private ButtonsState _buttonsState = new ButtonsState();
-        private PortalsState _portalsState = new PortalsState(); 
+        private PortalsState _portalsState = new PortalsState();
+        
+        private Grid<TileLogic> _grid = new ();
+        
+        public List<string> Errors = new List<string>();
 
-        private HUD _hud;
-
-        public SingleGameRun(GameManager mgr, GameObject levelParent, GameConfigSO config, HUD hud)
+        public static SingleGameRun Create(LevelData levelData)
         {
-            _mgr = mgr;
-            _hud = hud;
-            _map3d = new Map3dManager(
-                _mgr,
-                levelParent,
-                config);
+            return new SingleGameRun(levelData);
         }
 
-        public void Init()
+        public SingleGameRun(LevelData levelData)
         {
-            _gameEnded = false;
+            for (int x = 0; x < levelData.Size.x; ++x)
+            {
+                for (int y = 0; y < levelData.Size.y; ++y)
+                {
+                    var tile = levelData.Tiles[x][y];
+                    var coordinates = new Vector2Int(x, y);
+                    _grid.SetTile(coordinates, TileLogic.Create(tile, coordinates, this));
+                }
+            }
+      
+            GameState = GameState.PLAYING;
             _enemies.Clear();
             _playerCoords.Clear();
-            _selectedPlayerIdx = 0;
 
-            foreach (var tile in _mgr.GetGrid())
+            foreach (var tile in _grid)
             {
-                var occupier = tile.GetOccupierTileType();
                 var coords = tile.GetCoords();
+                var occupier = tile.GetOccupierTileType();
                 if ( occupier == TileOccupierType.HERO)
                 {
                     _playerCoords.Add(coords);
                 }
                 else if (occupier == TileOccupierType.ENEMY)
                 {
-                    _enemies.Add(new EnemyState(_mgr, this, coords));
+                    _enemies.Add(new EnemyState(this, coords));
                 }
 
                 var buttonColor = tile.GetButtonColor();
@@ -70,183 +75,107 @@ namespace Assets.Gameplay.Manager
                     _portalsState.RegisterPortal(portalColor.Value, coords);
                 }
             }
-
-            _map3d.Generate();
             
-            Toggle3dMap(_mgr.Is3dMapOn);
-
             if (_playerCoords.Count == 0) {
-                _gameEnded = true;
-                _hud.SetMainMessage("NO PLAYER ON THE LEVEL");
+                GameState = GameState.ERROR;
+                Errors.Add("NO PLAYER ON THE LEVEL");
                 return;
             }
 
             if (!_portalsState.IsValid(out var errorMessage))
             {
-                _gameEnded = true;
-                _hud.SetMainMessage(errorMessage);
+                GameState = GameState.ERROR;
+                Errors.Add(errorMessage);
                 return;
             }
-
-            _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(true);
         }
+        
+        public int GetPlayerCount() => _playerCoords.Count;
+        
+        public Vector2Int GetPlayerCoords(int idx) => _playerCoords[idx];
 
-        internal void Quit()
+        public void MakeMove(int playerIdx, Direction? dir)
         {
-            _map3d.Clear();
-            ShowEditorMap();
-        }
-
-        public void Toggle3dMap(bool turn3dOn)
-        {
-            Debug.Log("OnToggle3dMap" + turn3dOn);
-            if (turn3dOn)
-            {
-                HideEditorMap();
-                _map3d.Show();
-            }
-            else
-            {
-                ShowEditorMap();
-                _map3d.Hide();
-            }
-        }
-
-        private void HideEditorMap()
-        {
-            foreach (var t in _mgr.GetGrid())
-            {
-                t.gameObject.SetActive(false);
-            }
-        }
-
-        private void ShowEditorMap()
-        {
-            foreach (var t in _mgr.GetGrid())
-            {
-                t.gameObject.SetActive(true);
-            }
-        }
-
-
-        public void ChangeSelection(bool deselect = true) {
-            if (deselect) {
-                _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(false);
-            }
-            _selectedPlayerIdx += 1;
-            _selectedPlayerIdx %= _playerCoords.Count;
-            _mgr.GetGrid().GetTile(_playerCoords[_selectedPlayerIdx]).SetSelected(true);
-        }
-
-        public void MakeMove(Direction? dir)
-        {
-            if (_gameEnded) return;
+            if (GameState != GameState.PLAYING) return;
             if (dir == null) return;
 
-            var g = _mgr.GetGrid();
-            var playerCoords = _playerCoords[_selectedPlayerIdx];
-            var playerTile = g.GetTile(playerCoords);
-            var targetTile = g.GetAdjacentTile(playerCoords, dir.Value);
-
-            if (targetTile?.GetOccupierTileType() == TileOccupierType.STONE)
+            var playerCoords = GetPlayerCoords(playerIdx);
+            var playerTile = _grid.GetTile(playerCoords);
+            var targetTile = _grid.GetAdjacentTile(playerCoords, dir.Value);
+            
+            if (playerTile.HasExit(dir.Value))
             {
-                var afterStoneTile = g.GetAdjacentTile(targetTile.GetCoords(), dir.Value);
-                if (afterStoneTile?.GetOccupierTileType() == TileOccupierType.EMPTY
-                    && playerTile.AllowsMove(dir.Value)
-                    && targetTile.AllowsMove(dir.Value))
+                _playerCoords.RemoveAt(playerIdx);
+                if (_playerCoords.Count == 0)
                 {
-                    targetTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
-                    afterStoneTile.SetTileOccupierType(TileOccupierType.STONE, _buttonsState);
-                    targetTile.MoveObjectToTile(afterStoneTile);
+                    GameState = GameState.WON;
+                    return;
                 }
-            }
-
-            if (targetTile?.GetOccupierTileType() != TileOccupierType.EMPTY
-                || !playerTile.AllowsMove(dir.Value))
-            {
-                if (playerTile.TryInteract(dir.Value, this))
-                {
-                    moveEnemies();
-                    updateDoors();
-                }
+                moveEnemies();
                 return;
             }
             
-            if (targetTile.OnTileInteractable != null)
+            if (targetTile?.GetOccupierTileType() == TileOccupierType.STONE)
             {
-                targetTile.OnTileInteractable.TryInteract(this, playerCoords);
+                var afterStoneTile = _grid.GetAdjacentTile(targetTile.GetCoords(), dir.Value);
+                if (afterStoneTile?.GetOccupierTileType() == TileOccupierType.EMPTY
+                    && playerTile.AllowsMove(dir.Value, _buttonsState)
+                    && targetTile.AllowsMove(dir.Value, _buttonsState))
+                {
+                    targetTile.MoveOccupierTo(afterStoneTile);
+                }
             }
-
-            playerTile.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
-            playerTile.SetSelected(false);
-            if (targetTile.FloorType == TileFloorType.PORTAL)
+            
+            if (targetTile?.GetFloorType() == TileFloorType.PORTAL)
             {
-                var otherPortalCoords = _portalsState.GetOtherPortalCoords(targetTile.GetPortalColor().Value, targetTile.GetCoords());
-                var otherPortalTile = g.GetTile(otherPortalCoords);
+                var otherPortalCoords = targetTile.GetOtherPortalCoordinates(_portalsState);
+                var otherPortalTile = _grid.GetTile(otherPortalCoords);
                 if (otherPortalTile?.GetOccupierTileType() == TileOccupierType.EMPTY)
                 {
-                    playerTile.MoveObjectToTile(otherPortalTile);
-                    otherPortalTile.SetSelected(true);
-                    otherPortalTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
-                    _playerCoords[_selectedPlayerIdx] = otherPortalTile.GetCoords();
+                    _playerCoords[playerIdx] = otherPortalCoords;
+                    playerTile.MoveOccupierTo(otherPortalTile);
                     moveEnemies();
-                    updateDoors();
                     return;
                 }
             }
-            playerTile.MoveObjectToTile(targetTile);
-            targetTile.SetTileOccupierType(TileOccupierType.HERO, _buttonsState);
-            targetTile.SetSelected(true);
-            _playerCoords[_selectedPlayerIdx] = targetTile.GetCoords();
-            moveEnemies();
-            updateDoors();
-        }
 
-        private void updateDoors()
-        {
-            foreach (var tile in _mgr.GetGrid())
+            if (targetTile?.GetOccupierTileType() == TileOccupierType.EMPTY
+                && playerTile.AllowsMove(dir.Value, _buttonsState))
             {
-                tile.UpdateDoors(_buttonsState);
+                playerTile.MoveOccupierTo(targetTile);
+                _playerCoords[playerIdx] = targetTile.GetCoords();
+                moveEnemies();
             }
         }
 
         private void moveEnemies()
         {
             foreach (var e in _enemies) {
-                e.Move(_buttonsState);
+                e.Move();
             }
         }
-
-        public void HandleClick(Vector2Int coord, PointerEventData.InputButton button)
-        {
-            //do nothing
-        }
-
+        
         public void PlayerLost()
-        {
-            _gameEnded = true;
-            _hud.SetMainMessage("YOU LOST");
+        {                    
+            GameState = GameState.LOST;
+            //_hud.SetMainMessage("YOU LOST");
         }
 
-        public void Escape(Vector2Int coord)
+
+        public ButtonsState GetButtonsState()
         {
-            if (_playerCoords.Contains(coord))
-            {
-                _playerCoords.Remove(coord);
-                var t = _mgr.GetGrid().GetTile(coord);
-                t.SetSelected(false);
-                t.SetTileOccupierType(TileOccupierType.EMPTY, _buttonsState);
-                t.RemoveCurrentObject();
-            }
-            if (_playerCoords.Count == 0)
-            {
-                _gameEnded = true;
-                _hud.SetMainMessage("YOU WON");
-            }
-            else
-            {
-                ChangeSelection(false);
-            }
+            return _buttonsState;
+        }
+
+        // TODO: Fix encapsulation for Enemy state
+        public Grid<TileLogic> GetGrid() => _grid;
+
+        public delegate void OccupierMovedEvent(Vector2Int from, Vector2Int to);
+        public event OccupierMovedEvent OnOccupierMoved;
+
+        public void OccupierMoved(Vector2Int from, Vector2Int to)
+        {
+            OnOccupierMoved?.Invoke(from, to);
         }
     }
 }

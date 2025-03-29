@@ -17,11 +17,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     [SerializeField] private GameObject     WaterVisualisation;
     [SerializeField] private SpriteRenderer ButtonVisualisation;
     [SerializeField] private SpriteRenderer PortalVisualisation;
-
-
-    public IInteractable OnTileInteractable;
-    public Dictionary<Direction, IInteractable> Interactables = new();
-
+    
     [SerializeField] private List<Wall> Walls;
     private GameManager _mgr;
     private Vector2Int _coord;
@@ -42,9 +38,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         _mgr = manager;
         _coord = tile_coord;
         name = $"Tile_{_coord.x}_{_coord.y}";
-        for (int i = 0;i < Walls.Count; i++) {
-            Interactables[(Direction)i] = Walls[i];
-        }
 
         Debug.Assert(Walls.Count == 4, $"{this} invalid Walls count = {Walls.Count}");
 
@@ -103,7 +96,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         var wallIdx = (int)dir;
         Walls[wallIdx].ToggleWallExists();
-        Interactables[dir] = Walls[wallIdx].Exists ? Walls[wallIdx] : null;
     }
     
     
@@ -141,18 +133,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         PlayerVisualisation.SetActive(type == TileOccupierType.HERO);
         EnemyVisualisation.SetActive(type == TileOccupierType.ENEMY);
         StoneVisualisation.SetActive(type == TileOccupierType.STONE);
-
-        if (_buttonColor.HasValue && buttonsState != null)
-        {
-            if (type == TileOccupierType.EMPTY)
-            {
-                buttonsState.ButtonReleased(_buttonColor.Value, _coord);
-            }
-            else
-            {
-                buttonsState.ButtonPressed(_buttonColor.Value, _coord);
-            }
-        }
     }
 
 
@@ -165,16 +145,6 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
     public TileOccupierType GetOccupierTileType(){
         return _occupierType;
-    }
-
-    public bool TryInteract(Direction direction, SingleGameRun currentRun)
-    {
-        if (Interactables.ContainsKey(direction))
-        {
-            return Interactables[direction].TryInteract(currentRun, _coord);
-        }
-
-        return false;
     }
 
     public Vector2Int GetCoords()

@@ -6,7 +6,6 @@ namespace Gameplay.Manager.SingleRun
 {
     public class EnemyState
     {
-        private GameManager _mgr;
         private SingleGameRun _currentRun;
         private Vector2Int _coord;
 
@@ -16,16 +15,13 @@ namespace Gameplay.Manager.SingleRun
         private Direction _lastSeenDirection;
         private int _lastSeenDistance;
 
-        public EnemyState(GameManager mgr, SingleGameRun currentRun, Vector2Int coord)
+        public EnemyState( SingleGameRun currentRun, Vector2Int coord)
         {
-            _mgr = mgr;
             _currentRun = currentRun;
             _coord = coord;
         }
-
-        private Tile _myTile => _mgr.GetGrid().GetTile(_coord);
-
-        public void Move(ButtonsState buttonsState)
+        
+        public void Move()
         {
             _lastSeenInCurrentTurn = false;
 
@@ -33,17 +29,17 @@ namespace Gameplay.Manager.SingleRun
             
             if (_lastSeenPursueActive)
             {
-                var adjacent = _mgr.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
-                if (adjacent.FloorType == TileFloorType.WATER) { return; }
+                var adjacent = _currentRun.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
+                if (adjacent.GetFloorType() == TileFloorType.WATER) { return; }
                 if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     _currentRun.PlayerLost();
-                    moveTo(adjacent, buttonsState);
+                    moveTo(adjacent);
                     return;
                 }
                 if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
                 
-                moveTo(adjacent, buttonsState);
+                moveTo(adjacent);
                 _lastSeenDistance -= 1;
                 if (_lastSeenDistance == 0)
                 {
@@ -56,21 +52,23 @@ namespace Gameplay.Manager.SingleRun
 
         private void SeekForPlayers()
         {
+            var myTile = _currentRun.GetGrid().GetTile(_coord);
+
             for (int dir = 0; dir < 4; ++dir)
             {
                 var d = (Direction)dir;
-                if (!_myTile.AllowsMove(d)) { continue; }
-                seekPlayer(_myTile, d);
+                if (!myTile.AllowsMove(d, _currentRun.GetButtonsState())) { continue; }
+                seekPlayer(myTile, d);
             }
         }
 
-        private void seekPlayer(Tile tile, Direction d)
+        private void seekPlayer(TileLogic tile, Direction d)
         {
             var distance = 0;
-            while (tile != null && tile.AllowsMove(d))
+            while (tile != null && tile.AllowsMove(d, _currentRun.GetButtonsState()))
             {
                 distance += 1;
-                tile = _mgr.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
+                tile = _currentRun.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
                 if (tile?.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
@@ -83,16 +81,15 @@ namespace Gameplay.Manager.SingleRun
                     _lastSeenDirection = d;
                     _lastSeenDistance = distance;
                     _lastSeenCoord = tile.GetCoords();
-                    Debug.Log($"enemy on {_myTile}  spotted player on {tile} distance {distance}.");
+                    Debug.Log($"enemy on {_coord}  spotted player on {tile} distance {distance}.");
                 }
             }
         }
 
-        private void moveTo(Tile adjacent, ButtonsState buttonsState)
+        private void moveTo(TileLogic adjacent)
         {
-            _myTile.SetTileOccupierType(TileOccupierType.EMPTY, buttonsState);
-            _myTile.MoveObjectToTile(adjacent);
-            adjacent.SetTileOccupierType(TileOccupierType.ENEMY, buttonsState);
+            var myTile = _currentRun.GetGrid().GetTile(_coord);
+            myTile.MoveOccupierTo(adjacent);
             _coord = adjacent.GetCoords();
         }
     }

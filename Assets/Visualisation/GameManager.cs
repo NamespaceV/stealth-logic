@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using Assets.Common.Scripts;
 using System.IO;
+using System.Linq;
+using Gameplay.Manager.SingleRun;
 using Settings;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
 
 namespace Assets.Gameplay.Manager
 {
@@ -23,10 +22,13 @@ namespace Assets.Gameplay.Manager
         private Grid<Tile> _grid = new Grid<Tile>();
 
         private Vector2Int? _selectedTileCoord;
+        private int _selectedPlayerIndex;
         public bool isPlaying { get; private set; }
         private SingleGameRun _singleGameRun;
 
         [SerializeField] private HUD _hud;
+        private Map3dManager _map3d;
+
         private string _cleanLevelCopy;
 
         public bool Is3dMapOn { get; private set; }
@@ -85,7 +87,7 @@ namespace Assets.Gameplay.Manager
             }
             else
             {
-                if (Input.GetKeyDown(KeyCode.Tab)) _singleGameRun.ChangeSelection();
+                if (Input.GetKeyDown(KeyCode.Tab)) SelectNextPlayer();
             }
         }
 
@@ -94,7 +96,6 @@ namespace Assets.Gameplay.Manager
 
             if (isPlaying)
             {
-                _singleGameRun.HandleClick(coord, button);
                 return;
             }
 
@@ -123,7 +124,7 @@ namespace Assets.Gameplay.Manager
             Is3dMapOn = turn3dOn;
             if (isPlaying)
             {
-                _singleGameRun.Toggle3dMap(turn3dOn);
+                Toggle3dMap(turn3dOn);
             }
         }
 
@@ -135,7 +136,34 @@ namespace Assets.Gameplay.Manager
 
             if (isPlaying)
             {
-                _singleGameRun.MakeMove(dir);
+                var selectedTile = _grid.GetTile(_selectedTileCoord.Value);
+                selectedTile.SetSelected(false);
+                
+                _singleGameRun.MakeMove(_selectedPlayerIndex, dir);
+                
+                if (_singleGameRun.GameState == GameState.WON)
+                {
+                    _hud.SetMainMessage("WON");
+                    return;
+                }
+                if (_singleGameRun.GameState == GameState.LOST)
+                {
+                    _hud.SetMainMessage("LOST");
+                    return;
+                }
+                if (_singleGameRun.GameState == GameState.ERROR)
+                {
+                    _hud.SetMainMessage("ERROR\n"+_singleGameRun.Errors.First());
+                    return;
+                }
+
+                updateDoors();
+
+                _selectedPlayerIndex = _selectedPlayerIndex % _singleGameRun.GetPlayerCount();
+                var newPlayerCoord = _singleGameRun.GetPlayerCoords(_selectedPlayerIndex);
+                _grid.GetTile(newPlayerCoord).SetSelected(true);
+                _selectedTileCoord = newPlayerCoord;
+
                 return;
             }
             // EDITOR
@@ -348,23 +376,106 @@ namespace Assets.Gameplay.Manager
                     _grid.GetTile(_selectedTileCoord.Value).SetSelected(false);
                     _selectedTileCoord = null;
                 }
-                _cleanLevelCopy = JsonUtility.ToJson(serializeCurrentLevel());
+
+                var levelData = serializeCurrentLevel();
+                _cleanLevelCopy = JsonUtility.ToJson(levelData);
+                _singleGameRun = SingleGameRun.Create(levelData);
+
+                if (_singleGameRun.Errors.Any())
+                {
+                    _hud.SetMainMessage(_singleGameRun.Errors.First());
+                }
 
                 isPlaying = true;
+                
                 Debug.Log($"GM StartRun 3d  on {Is3dMapOn}");
+                _map3d = new Map3dManager(this, LevelParent, gameConfig);
+                _map3d.Generate();
+                Toggle3dMap(Is3dMapOn);
+                    
+                var newPlayerCoord = _singleGameRun.GetPlayerCoords(_selectedPlayerIndex);
+                _grid.GetTile(newPlayerCoord).SetSelected(true);
+                _selectedTileCoord = newPlayerCoord;
+
+                _singleGameRun.OnOccupierMoved += OccupierMoved;
 
                 _hud.StartPlay();
-                _singleGameRun = new SingleGameRun(this, LevelParent, gameConfig, _hud);
-                _singleGameRun.Init();
-
             } else {
                 isPlaying = false;
                 _hud.EndPlay();
-                _singleGameRun.Quit();
+                Quit();
                 _singleGameRun = null;
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
                 loadLevelData(cleanLevel);
             }
+        }
+
+        private void OccupierMoved(Vector2Int from, Vector2Int to)
+        {
+            var occupierType = _singleGameRun.GetGrid().GetTile(to).GetOccupierTileType();
+            Debug.Log($"GM OccupierMoved {from} {to} TYPE:{occupierType}");
+            var fromTile = _grid.GetTile(from);
+            var toTile = _grid.GetTile(to);
+            fromTile.MoveObjectToTile(toTile);
+            fromTile.SetTileOccupierType(TileOccupierType.EMPTY, null);
+            toTile.SetTileOccupierType(occupierType, null);
+        }
+
+        internal void Quit()
+        {
+            _map3d.Clear();
+            ShowEditorMap();
+        }
+
+        public void Toggle3dMap(bool turn3dOn)
+        {
+            Debug.Log("OnToggle3dMap" + turn3dOn);
+            if (turn3dOn)
+            {
+                HideEditorMap();
+                _map3d.Show();
+            }
+            else
+            {
+                ShowEditorMap();
+                _map3d.Hide();
+            }
+        }
+
+        private void HideEditorMap()
+        {
+            foreach (var t in GetGrid())
+            {
+                t.gameObject.SetActive(false);
+            }
+        }
+
+        private void ShowEditorMap()
+        {
+            foreach (var t in GetGrid())
+            {
+                t.gameObject.SetActive(true);
+            }
+        }
+
+        private void updateDoors()
+        {
+            foreach (var tile in GetGrid())
+            {
+                tile.UpdateDoors(_singleGameRun.GetButtonsState());
+            }
+        }
+
+        public void SelectNextPlayer()
+        {
+            var selectedTile = _grid.GetTile(_selectedTileCoord.Value);
+            selectedTile.SetSelected(false);
+                
+            _selectedPlayerIndex = (_selectedPlayerIndex + 1) % _singleGameRun.GetPlayerCount();
+
+            var newPlayerCoord = _singleGameRun.GetPlayerCoords(_selectedPlayerIndex);
+            _grid.GetTile(newPlayerCoord).SetSelected(true);
+            _selectedTileCoord = newPlayerCoord;
         }
     }
 }

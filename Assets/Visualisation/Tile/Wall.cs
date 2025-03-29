@@ -6,7 +6,7 @@ using Gameplay.Manager.SingleRun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Wall : MonoBehaviour, IInteractable
+public class Wall : MonoBehaviour
 {
     private static readonly Color[] DoorColors =
     {
@@ -133,19 +133,7 @@ public class Wall : MonoBehaviour, IInteractable
         _doorType = _doorType == DoorType.GATE_RAINBOW ? DoorType.NONE : DoorType.GATE_RAINBOW;
         UpdateWallSprites();
     }
-
-
-    public bool TryInteract(SingleGameRun gameRun, Vector2Int coord)
-    {
-        if(IsExit)
-        {
-            gameRun.Escape(coord);
-            return true;
-        }
-
-        return false;
-    }
-
+    
     public void ReadFromData(WallData wallData)
     {
         if (!wallData.Exists)
