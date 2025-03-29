@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataFormats.Helper;
 using UnityEngine;
 
-namespace Assets.Common.Scripts
+namespace DataFormats
 {
     [Serializable]
     public class LevelData

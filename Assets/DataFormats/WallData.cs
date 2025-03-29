@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Common.Scripts
+namespace DataFormats
 {
     [Serializable]
     public class WallData

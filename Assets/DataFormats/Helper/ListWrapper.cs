@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Common.Scripts
+namespace DataFormats.Helper
 {
     // Unity cant serialize List<List<>> :/
     // https://discussions.unity.com/t/serialize-nested-lists/47472/2

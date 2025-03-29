@@ -1,10 +1,10 @@
 ﻿using System;
-using Assets.Common.Scripts;
-using Gameplay.Manager.SingleRun;
-using NUnit.Framework;
+using CoreLogic.Grid;
+using CoreLogic.States;
+using DataFormats;
 using UnityEngine;
 
-namespace Assets.Gameplay.Manager
+namespace CoreLogic
 {
     public class TileLogic
     {
@@ -67,16 +67,15 @@ namespace Assets.Gameplay.Manager
 
         public static bool DoorIsOpen(DoorType type, DoorColor color, ButtonsState buttonsState)
         {
-            switch (type)
+            return type switch
             {
-                case DoorType.NONE: return false;
-                case DoorType.EXIT: return true;
-                case DoorType.DOOR: return buttonsState.IsAnyButtonPressed(color);
-                case DoorType.GATE_SINGLE: return buttonsState.AreAllButtonsPressed(color);
-                case DoorType.GATE_RAINBOW: return buttonsState.AreAllColorsPressed();
-            }
-
-            throw new Exception($"Unknown door type: {type}");
+                DoorType.NONE => false,
+                DoorType.EXIT => true,
+                DoorType.DOOR => buttonsState.IsAnyButtonPressed(color),
+                DoorType.GATE_SINGLE => buttonsState.AreAllButtonsPressed(color),
+                DoorType.GATE_RAINBOW => buttonsState.AreAllColorsPressed(),
+                _ => throw new Exception($"Unknown door type: {type}")
+            };
         }
 
         public Vector2Int GetOtherPortalCoordinates(PortalsState portalsState)

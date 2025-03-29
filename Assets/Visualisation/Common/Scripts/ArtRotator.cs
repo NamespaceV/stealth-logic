@@ -1,25 +1,26 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ArtRotator : MonoBehaviour
+namespace Visualisation.Common.Scripts
 {
-    public bool Rotate;
-    public bool ChangleAngle;
-
-    private Transform cameraTransform;
-
-    private void Start()
+    public class ArtRotator : MonoBehaviour
     {
-        cameraTransform = Camera.main.transform;
-    }
+        public bool Rotate;
+        public bool ChangleAngle;
 
-    private void Update()
-    {
-        if (Rotate)
+        private Transform cameraTransform;
+
+        private void Start()
         {
-            transform.LookAt(cameraTransform);
-            transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+            cameraTransform = Camera.main.transform;
+        }
+
+        private void Update()
+        {
+            if (Rotate)
+            {
+                transform.LookAt(cameraTransform);
+                transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+            }
         }
     }
 }

@@ -1,7 +1,10 @@
-﻿public enum TileOccupierType
+﻿namespace DataFormats
 {
-    EMPTY,
-    ENEMY,
-    HERO,
-    STONE,
+    public enum TileOccupierType
+    {
+        EMPTY,
+        ENEMY,
+        HERO,
+        STONE,
+    }
 }

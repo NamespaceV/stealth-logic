@@ -1,14 +1,19 @@
 ﻿using System.Collections.Generic;
-using Assets.Common.Scripts;
 using System.IO;
 using System.Linq;
-using Gameplay.Manager.SingleRun;
+using CoreLogic;
+using CoreLogic.Grid;
+using DataFormats;
+using DataFormats.Helper;
 using Settings;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using Visualisation.HUD;
+using Visualisation.Map3D;
+using Visualisation.TileVisualisation;
 
-namespace Assets.Gameplay.Manager
+namespace Visualisation
 {
     public class GameManager :  MonoBehaviour
     {
@@ -26,7 +31,7 @@ namespace Assets.Gameplay.Manager
         public bool isPlaying { get; private set; }
         private SingleGameRun _singleGameRun;
 
-        [SerializeField] private HUD _hud;
+        [SerializeField] private HUD.HUD _hud;
         private Map3dManager _map3d;
 
         private string _cleanLevelCopy;

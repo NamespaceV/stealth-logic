@@ -1,6 +1,9 @@
-﻿public enum TileFloorType
+﻿namespace DataFormats
 {
-    EMPTY,
-    WATER,
-    PORTAL,
+    public enum TileFloorType
+    {
+        EMPTY,
+        WATER,
+        PORTAL,
+    }
 }

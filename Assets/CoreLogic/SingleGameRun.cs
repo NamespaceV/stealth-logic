@@ -1,9 +1,10 @@
-﻿using Assets.Common.Scripts;
-using System.Collections.Generic;
-using Gameplay.Manager.SingleRun;
+﻿using System.Collections.Generic;
+using CoreLogic.Grid;
+using CoreLogic.States;
+using DataFormats;
 using UnityEngine;
 
-namespace Assets.Gameplay.Manager
+namespace CoreLogic
 {
     public enum GameState
     {
@@ -17,10 +18,10 @@ namespace Assets.Gameplay.Manager
     {
         public GameState GameState { get; private set; }
 
-        private List<Vector2Int> _playerCoords = new List<Vector2Int>();
-        private List<EnemyState> _enemies = new List<EnemyState>();
-        private ButtonsState _buttonsState = new ButtonsState();
-        private PortalsState _portalsState = new PortalsState();
+        private List<Vector2Int> _playerCoords = new();
+        private List<EnemyState> _enemies = new();
+        private ButtonsState _buttonsState = new();
+        private PortalsState _portalsState = new();
         
         private Grid<TileLogic> _grid = new ();
         

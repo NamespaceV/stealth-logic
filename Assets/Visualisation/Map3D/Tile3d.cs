@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Gameplay.Manager.SingleRun
+namespace Visualisation.Map3D
 {
     public class Tile3d
     {

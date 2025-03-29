@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
+using DataFormats;
 using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.InputSystem.Controls;
 
-namespace Gameplay.Manager.SingleRun
+namespace CoreLogic.States
 {
     public class ButtonsState
     {

@@ -1,9 +1,10 @@
-﻿using Assets.Common.Scripts;
-using Assets.Gameplay.Manager;
+﻿using CoreLogic.Grid;
+using DataFormats;
 using Settings;
 using UnityEngine;
+using Visualisation.TileVisualisation;
 
-namespace Gameplay.Manager.SingleRun
+namespace Visualisation.Map3D
 {
     public class Map3dManager
     {

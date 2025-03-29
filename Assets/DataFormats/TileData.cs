@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Serialization;
 
-namespace Assets.Common.Scripts
+namespace DataFormats
 {
     [Serializable]
     public class TileData

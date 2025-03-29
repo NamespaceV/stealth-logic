@@ -1,8 +1,8 @@
-﻿using Assets.Common.Scripts;
-using Assets.Gameplay.Manager;
+﻿using CoreLogic.Grid;
+using DataFormats;
 using UnityEngine;
 
-namespace Gameplay.Manager.SingleRun
+namespace CoreLogic.States
 {
     public class EnemyState
     {
