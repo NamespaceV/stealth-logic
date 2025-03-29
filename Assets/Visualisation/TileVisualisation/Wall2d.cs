@@ -12,7 +12,7 @@ namespace Visualisation.TileVisualisation
             Color.red,
             Color.green,
             new Color(0, 0.7f, 0.7f),
-            new Color(0.7f, 0.0f, 0.7f),
+            new Color(0.7f, 0.7f, 0.0f),
         };
         public static Color FromColor(DoorColor doorColor) => DoorColors[(int)doorColor];
         public static DoorColor Next(DoorColor a) => (DoorColor)(((int)a + 1) % DoorColors.Length);
