@@ -8,21 +8,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.Controls;
 
-public enum TileOccupierType
-{
-    EMPTY,
-    ENEMY,
-    HERO,
-    STONE,
-}
-
-public enum TileFloorType
-{
-    EMPTY,
-    WATER,
-    PORTAL,
-}
-
 public class Tile : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private SpriteRenderer Background;

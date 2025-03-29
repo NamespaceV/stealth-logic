@@ -6,23 +6,6 @@ using Gameplay.Manager.SingleRun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public enum DoorType
-{
-    NONE = 0,
-    EXIT,
-    DOOR,
-    GATE_SINGLE,
-    GATE_RAINBOW,
-}
-
-public enum DoorColor
-{
-    COLOR_0_RED,
-    COLOR_1_GREEN,
-    COLOR_2_BLUE,
-    COLOR_3_VIOLET,
-}
-
 public class Wall : MonoBehaviour, IInteractable
 {
     private static readonly Color[] DoorColors =
