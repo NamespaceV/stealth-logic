@@ -159,6 +159,11 @@ namespace Visualisation.TileVisualisation
 
         public void MoveObjectToTile(Tile2d targetTile2d)
         {
+            if (_occupierType == TileOccupierType.STONE)
+            {
+                return; // no 3d occupier
+            }
+
             _tile3d.MoveObjectToTile(targetTile2d._tile3d);
         }
 
