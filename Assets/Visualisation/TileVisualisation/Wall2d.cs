@@ -6,7 +6,7 @@ using Gameplay.Manager.SingleRun;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Wall : MonoBehaviour
+public class Wall2d : MonoBehaviour
 {
     private static readonly Color[] DoorColors =
     {
@@ -30,7 +30,7 @@ public class Wall : MonoBehaviour
     private Color _defaultColor;
     private Color _exitColor = Color.cyan;
 
-    private Tile _tile;
+    private Tile2d _tile2d;
     [SerializeField] private SpriteRenderer _wallSpriteRenderer;
     [SerializeField] private SpriteRenderer _doorSprite;
     [SerializeField] private SpriteRenderer _doorOpeningSprite;
@@ -39,7 +39,7 @@ public class Wall : MonoBehaviour
 
     private void Awake()
     {
-        _tile = GetComponentInParent<Tile>();
+        _tile2d = GetComponentInParent<Tile2d>();
         _defaultColor = _wallSpriteRenderer.color;
     }
 
@@ -53,13 +53,9 @@ public class Wall : MonoBehaviour
         switch (_doorType)
         {
             case DoorType.DOOR: 
-                _isOpen = buttonsState.IsAnyButtonPressed(_doorColor); 
-                break;
             case DoorType.GATE_SINGLE:
-                _isOpen = buttonsState.AreAllButtonsPressed(_doorColor); 
-                break;
             case DoorType.GATE_RAINBOW:
-                _isOpen = buttonsState.AreAllColorsPressed(); 
+                _isOpen = TileLogic.DoorIsOpen(_doorType, _doorColor, buttonsState); 
                 break;
         }
 

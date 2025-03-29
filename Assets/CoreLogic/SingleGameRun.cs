@@ -105,6 +105,7 @@ namespace Assets.Gameplay.Manager
             
             if (playerTile.HasExit(dir.Value))
             {
+                playerTile.FreePlayer();
                 _playerCoords.RemoveAt(playerIdx);
                 if (_playerCoords.Count == 0)
                 {

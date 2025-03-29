@@ -19,7 +19,7 @@ namespace Assets.Gameplay.Manager
         public int mapWidth = 10;
         public int mapHeight = 10;
 
-        private Grid<Tile> _grid = new Grid<Tile>();
+        private Grid<Tile2d> _grid = new Grid<Tile2d>();
 
         private Vector2Int? _selectedTileCoord;
         private int _selectedPlayerIndex;
@@ -66,7 +66,7 @@ namespace Assets.Gameplay.Manager
                 {
                     var coord = new Vector2Int(x, y);
                     var go = Instantiate(gameConfig.Tile2DPrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
-                    var tile = go.GetComponent<Tile>();
+                    var tile = go.GetComponent<Tile2d>();
                     tile.Register(this, coord);
                     _grid.SetTile(coord, tile);
                 }
@@ -74,7 +74,7 @@ namespace Assets.Gameplay.Manager
         }
 
 
-        public Grid<Tile> GetGrid() { return _grid; }
+        public Grid<Tile2d> GetGrid() { return _grid; }
 
         private void Update()
         {
@@ -359,7 +359,7 @@ namespace Assets.Gameplay.Manager
                 {
                     var coord = new Vector2Int(x, y);
                     var go = Instantiate(gameConfig.Tile2DPrefab, new Vector2(coord.x, coord.y), Quaternion.identity, transform);
-                    var tile = go.GetComponent<Tile>();
+                    var tile = go.GetComponent<Tile2d>();
                     tile.ReadFromData(data.Tiles[x][y]);
                     tile.Register(this, coord);
                     _grid.SetTile(coord, tile);

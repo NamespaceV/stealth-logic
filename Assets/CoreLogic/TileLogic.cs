@@ -38,14 +38,15 @@ namespace Assets.Gameplay.Manager
             Debug.Assert(nextTile._occupierType == TileOccupierType.EMPTY);
             nextTile._occupierType = _occupierType;
             _occupierType = TileOccupierType.EMPTY;
-            
+
             _currentRun.OccupierMoved(GetCoords(), nextTile.GetCoords());
-            
+
             var buttons = _currentRun.GetButtonsState();
             if (_tile.HasButton)
             {
                 buttons.ButtonReleased(_tile.ButtonColor, _coordinates);
             }
+
             if (nextTile._tile.HasButton)
             {
                 buttons.ButtonPressed(nextTile._tile.ButtonColor, nextTile._coordinates);
@@ -64,7 +65,7 @@ namespace Assets.Gameplay.Manager
             return DoorIsOpen(wallData.DoorType, wallData.DoorColor, buttonsState);
         }
 
-        private bool DoorIsOpen(DoorType type, DoorColor color, ButtonsState buttonsState)
+        public static bool DoorIsOpen(DoorType type, DoorColor color, ButtonsState buttonsState)
         {
             switch (type)
             {
@@ -81,6 +82,19 @@ namespace Assets.Gameplay.Manager
         public Vector2Int GetOtherPortalCoordinates(PortalsState portalsState)
         {
             return portalsState.GetOtherPortalCoords(_tile.PortalColor, GetCoords());
+        }
+
+        public void KillPlayer()
+        {
+            Debug.Assert(_occupierType == TileOccupierType.HERO);
+            _occupierType = TileOccupierType.EMPTY;
+        }
+
+        public void FreePlayer()
+        {
+            Debug.Assert(_occupierType == TileOccupierType.HERO);
+            _occupierType = TileOccupierType.EMPTY;
+            _currentRun.OccupierMoved(GetCoords(), GetCoords());
         }
     }
 }

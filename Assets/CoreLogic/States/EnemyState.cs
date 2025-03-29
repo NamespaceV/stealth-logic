@@ -34,6 +34,7 @@ namespace Gameplay.Manager.SingleRun
                 if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     _currentRun.PlayerLost();
+                    adjacent.KillPlayer();
                     moveTo(adjacent);
                     return;
                 }

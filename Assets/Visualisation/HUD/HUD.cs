@@ -65,7 +65,7 @@ public class HUD : MonoBehaviour
 
         ToggleToolboxButton(_selectedToolIdx);
 
-        _doorColorPicker.color = Wall.FromColor(GetSelectedDoorColor());
+        _doorColorPicker.color = Wall2d.FromColor(GetSelectedDoorColor());
     }
 
     private void ClearToolbox()
@@ -150,7 +150,7 @@ public class HUD : MonoBehaviour
 
     public void ToggleSelectedButtonColor(bool forward)
     {
-        _selectedDoorColor = forward ? Wall.Next(_selectedDoorColor) : Wall.Prev(_selectedDoorColor);
-        _doorColorPicker.color = Wall.FromColor(_selectedDoorColor);
+        _selectedDoorColor = forward ? Wall2d.Next(_selectedDoorColor) : Wall2d.Prev(_selectedDoorColor);
+        _doorColorPicker.color = Wall2d.FromColor(_selectedDoorColor);
     }
 }

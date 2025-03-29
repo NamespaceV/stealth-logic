@@ -36,12 +36,13 @@ namespace Gameplay.Manager.SingleRun
                     var prefab = tile.FloorType == TileFloorType.WATER ? _config.FloorWaterTilePrefab : _config.FloorTilePrefab;
                     GameObject floor = Object.Instantiate(prefab, new Vector3(x, 0, y), Quaternion.identity);
                     floor.transform.SetParent(LevelParent.transform);
-                    tile.SetFloor3D(floor);
+                    tile._tile3d.SetFloor(floor);
+                    tile._tile3d.SetSelected(tile.IsSelected);
                     var buttonColor = tile.GetButtonColor();
                     if (buttonColor.HasValue)
                     {
                         var button = Object.Instantiate(_config.ButtonPrefab, new Vector3(x, 0.01f, y), Quaternion.identity, floor.gameObject.transform);
-                        button.GetComponentInChildren<SpriteRenderer>().color = Wall.FromColor(buttonColor.Value);
+                        button.GetComponentInChildren<SpriteRenderer>().color = Wall2d.FromColor(buttonColor.Value);
                     }
                 }
             }
@@ -55,37 +56,40 @@ namespace Gameplay.Manager.SingleRun
                     case TileOccupierType.EMPTY:
                         break;
                     case TileOccupierType.ENEMY:
-                        GameObject enemy = Object.Instantiate(_config.EnemyPrefab, tile.Pos, Quaternion.identity);
-                        enemy.transform.SetParent(LevelParent.transform);
-                        tile.currentObject = enemy;
+                        SpawnOccupier(tile._tile3d, _config.EnemyPrefab);
                         break;
                     case TileOccupierType.HERO:
-                        GameObject player = Object.Instantiate(_config.PlayerPrefab, tile.Pos, Quaternion.identity);
-                        player.transform.SetParent(LevelParent.transform);
-                        tile.currentObject = player;
+                        SpawnOccupier(tile._tile3d, _config.PlayerPrefab);
                         break;
                 }
             }
         }
-        
-        
-        private void ProcessWalls(Tile tile)
+
+        private void SpawnOccupier(Tile3d tileTile3d, GameObject prefab)
         {
-            SpawnWall3d(tile, Direction.Up, Quaternion.identity);
-            SpawnWall3d(tile, Direction.Down, Quaternion.Euler(new(0, 180, 0)));
-            SpawnWall3d(tile, Direction.Left, Quaternion.Euler(new(0, -90, 0)));
-            SpawnWall3d(tile, Direction.Right, Quaternion.Euler(new(0, 90, 0)));
+            GameObject occupier = Object.Instantiate(prefab, tileTile3d.Pos, Quaternion.identity);
+            occupier.transform.SetParent(LevelParent.transform);
+            tileTile3d._occupier3d = occupier;
         }
 
-        private void SpawnWall3d(Tile tile, Direction dir, Quaternion rotation)
+        private void ProcessWalls(Tile2d tile2d)
         {
-            if (tile.HasWall(dir))
+            SpawnWall3d(tile2d, Direction.Up, Quaternion.identity);
+            SpawnWall3d(tile2d, Direction.Down, Quaternion.Euler(new(0, 180, 0)));
+            SpawnWall3d(tile2d, Direction.Left, Quaternion.Euler(new(0, -90, 0)));
+            SpawnWall3d(tile2d, Direction.Right, Quaternion.Euler(new(0, 90, 0)));
+        }
+
+        private void SpawnWall3d(Tile2d tile2d, Direction dir, Quaternion rotation)
+        {
+            if (!tile2d.HasWall(dir)) { return; }
+            
+            GameObject wall = Object.Instantiate(_config.WallTilePrefab, tile2d._tile3d.Pos, rotation);
+            if (tile2d.GetWall(dir).IsExit)
             {
-                GameObject wall = Object.Instantiate(_config.WallTilePrefab, tile.Pos, rotation);
-                if (tile.GetWall(dir).IsExit)
-                    wall.GetComponentInChildren<SpriteRenderer>().sprite = _config.ExitSprite;
-                wall.transform.SetParent(LevelParent.transform);
+                wall.GetComponentInChildren<SpriteRenderer>().sprite = _config.ExitSprite;
             }
+            wall.transform.SetParent(LevelParent.transform);
         }
         
         public void Clear()

@@ -7,8 +7,9 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.Serialization;
 
-public class Tile : MonoBehaviour, IPointerClickHandler
+public class Tile2d : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private SpriteRenderer Background;
     [SerializeField] private GameObject     PlayerVisualisation;
@@ -18,21 +19,21 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     [SerializeField] private SpriteRenderer ButtonVisualisation;
     [SerializeField] private SpriteRenderer PortalVisualisation;
     
-    [SerializeField] private List<Wall> Walls;
+    [SerializeField] private List<Wall2d> Walls;
     private GameManager _mgr;
     private Vector2Int _coord;
-    public Vector3 Pos;
     private TileOccupierType _occupierType;
     private TileFloorType _floorType;
     private DoorColor? _buttonColor;
     private DoorColor? _portalColor;
     private int _heroCount;
-    public GameObject currentObject;
+    
     [SerializeField] private bool _selected;
-    [SerializeField] private GameObject _floor3d;
-    private GameObject _floor3dSelectionMeshGO;
-
+    
+    public Tile3d _tile3d = new Tile3d();
+    
     public TileFloorType FloorType { get => _floorType; set => SetFloorType(value); }
+    public bool IsSelected => _selected;
 
     public void Register(GameManager manager, Vector2Int tile_coord) {
         _mgr = manager;
@@ -41,7 +42,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
 
         Debug.Assert(Walls.Count == 4, $"{this} invalid Walls count = {Walls.Count}");
 
-        Pos = new(_coord.x, 0, _coord.y);
+        _tile3d.InitPosition(_coord);
     }
 
     public void ReadFromData(TileData tileData)
@@ -121,10 +122,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     {
         _selected = val;
         Background.color = val ? Color.red : Color.white;
-        if (_floor3dSelectionMeshGO != null)
-        {
-            _floor3dSelectionMeshGO?.SetActive(_selected);
-        }
+        _tile3d.SetSelected(val);
     }
 
     public void SetTileOccupierType(TileOccupierType type, [CanBeNull] ButtonsState buttonsState)
@@ -153,42 +151,21 @@ public class Tile : MonoBehaviour, IPointerClickHandler
     }
 
     public bool HasWall(Direction dir) => Walls[(int)dir].BlocksMovement();
-
-    public bool AllowsMove(Direction dir)
-    {
-        return !HasWall(dir);
-    }
-
-    public Wall GetWall(Direction dir)
+    
+    public Wall2d GetWall(Direction dir)
     {
         return Walls[(int)dir];
     }
 
-    public void RemoveCurrentObject()
+    public void MoveObjectToTile(Tile2d targetTile2d)
     {
-        Destroy(currentObject.gameObject);
-        currentObject = null;
-    }
-
-    public void MoveObjectToTile(Tile targetTile)
-    {
-        if (currentObject == null) return;
-        currentObject.transform.position = targetTile.Pos;
-        targetTile.currentObject = currentObject;
-        currentObject = null;
+        _tile3d.MoveObjectToTile(targetTile2d._tile3d);
     }
 
     internal void ToggleExit(Direction dir)
     {
         if (!HasWall(dir)) return;
         GetWall(dir).ToggleExit();
-    }
-
-    public void SetFloor3D(GameObject floor3d)
-    {
-        _floor3d = floor3d;
-        _floor3dSelectionMeshGO = _floor3d.GetComponentInChildren<MeshRenderer>(includeInactive: true)?.gameObject;
-        _floor3dSelectionMeshGO.SetActive(_selected);
     }
 
     public void ToggleButton(DoorColor buttonColor)
@@ -209,7 +186,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         PortalVisualisation.gameObject.SetActive(_portalColor != null);
         if (_portalColor !=  null)
         {
-            PortalVisualisation.color = Wall.FromColor(_portalColor.Value);
+            PortalVisualisation.color = Wall2d.FromColor(_portalColor.Value);
         }
     }
 
@@ -222,7 +199,7 @@ public class Tile : MonoBehaviour, IPointerClickHandler
         ButtonVisualisation.gameObject.SetActive(_buttonColor.HasValue);
         if (_buttonColor.HasValue)
         {
-            ButtonVisualisation.color = Wall.FromColor(_buttonColor.Value);
+            ButtonVisualisation.color = Wall2d.FromColor(_buttonColor.Value);
         }
     }
 
