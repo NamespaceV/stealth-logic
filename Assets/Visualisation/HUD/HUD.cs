@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DataFormats;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Visualisation.TileVisualisation;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Visualisation.HUD
 {
@@ -26,6 +31,7 @@ namespace Visualisation.HUD
     {
         [SerializeField] private Button _saveButton;
         [SerializeField] private Button _loadButton;
+        [SerializeField] private TMP_Dropdown _levelsDropdown;
         [SerializeField] private TMP_Text _runButtonText;
     
         [SerializeField] private TMP_Text _mainMessage;
@@ -69,6 +75,18 @@ namespace Visualisation.HUD
             ToggleToolboxButton(_selectedToolIdx);
 
             _doorColorPicker.color = Wall2d.FromColor(GetSelectedDoorColor());
+
+            var levelFiles = GameManager.Instance.LevelFiles;
+            _levelsDropdown.options.Clear();
+            foreach (var f in levelFiles)
+            {
+                var option = new TMP_Dropdown.OptionData(f.name);
+                _levelsDropdown.options.Add(option);
+            }
+            
+#if ! UNITY_EDITOR
+            _saveButton.interactable = false;
+#endif
         }
 
         private void ClearToolbox()
@@ -115,10 +133,72 @@ namespace Visualisation.HUD
             _toolboxButtons[i].colors = c;
         }
 
+        public void OnPlayClicked()
+        {
+            GameManager.Instance.StartRun();
+        }
+        
+        public void OnSaveClicked()
+        {
+#if UNITY_EDITOR
+            var idx = _levelsDropdown.value;
+            var levelJsonFile = GameManager.Instance.LevelFiles[idx];
+            var data = JsonUtility.ToJson(GameManager.Instance.SerializeCurrentLevel());
+            File.WriteAllText(Application.dataPath+"/levels/"+levelJsonFile.name+".json", data);
+            AssetDatabase.Refresh();
+#endif
+        }
+        
+        public void OnLoadClicked()
+        {
+            var idx = _levelsDropdown.value;
+            var level = GameManager.Instance.LevelFiles[idx];
+            var data = JsonUtility.FromJson<LevelData>(level.text);
+            GameManager.Instance.LoadLevelData(data);
+        }
+        
+        //
+        // public void SaveLevel()
+        // {
+        //     if (isPlaying) return;
+        //     
+        //     SimpleFileBrowser.FileBrowser.ShowSaveDialog(
+        //         (path) => {
+        //             LevelData data = serializeCurrentLevel();
+        //             File.WriteAllText(path[0], JsonUtility.ToJson(data));
+        //         },
+        //         onCancel: null,
+        //         pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
+        //         allowMultiSelection: false,
+        //         initialPath: LevelsPath,
+        //         initialFilename:"level.json",
+        //         title:"Select File", saveButtonText:"Save");
+        // }
+        
+        // public void LoadLevel()
+        // {
+        //     if (isPlaying) return;
+        //
+        //     SimpleFileBrowser.FileBrowser.ShowLoadDialog(
+        //         (path) => {
+        //             PlayerPrefs.SetString("LastLevelOpened", path[0]);
+        //             var fileText = File.ReadAllText(path[0]);
+        //             var data = JsonUtility.FromJson<LevelData>(fileText);
+        //             loadLevelData(data);
+        //         },
+        //         onCancel: null,
+        //         pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
+        //         allowMultiSelection: false,
+        //         initialPath: LevelsPath,
+        //         initialFilename: "level.json",
+        //         title: "Select File", loadButtonText: "Select");
+        // }
+
         public void StartPlay() {
             _runButtonText.text = "Quit play";
             _saveButton.gameObject.SetActive(false);
             _loadButton.gameObject.SetActive(false);
+            _levelsDropdown.gameObject.SetActive(false);
             _doorColorPicker.gameObject.SetActive(false);
             _toolbox.SetActive(false);
             SetSmallMessage("");
@@ -129,6 +209,7 @@ namespace Visualisation.HUD
             _runButtonText.text = "Play";
             _saveButton.gameObject.SetActive(true);
             _loadButton.gameObject.SetActive(true);
+            _levelsDropdown.gameObject.SetActive(true);
             _doorColorPicker.gameObject.SetActive(true);
             _toolbox.SetActive(true);
             SetSmallMessage("");

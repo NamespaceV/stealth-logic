@@ -53,7 +53,7 @@ namespace Visualisation
             if (!string.IsNullOrEmpty(lastLevelPath) && File.Exists(lastLevelPath)) {
                 var fileText = File.ReadAllText(lastLevelPath);
                 var data = JsonUtility.FromJson<LevelData>(fileText);
-                loadLevelData(data);
+                LoadLevelData(data);
             }
             else
             {
@@ -284,24 +284,7 @@ namespace Visualisation
             return null;
         }
 
-        public void SaveLevel()
-        {
-            if (isPlaying) return;
-            
-            SimpleFileBrowser.FileBrowser.ShowSaveDialog(
-                (path) => {
-                    LevelData data = serializeCurrentLevel();
-                    File.WriteAllText(path[0], JsonUtility.ToJson(data));
-                },
-                onCancel: null,
-                pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
-                allowMultiSelection: false,
-                initialPath: LevelsPath,
-                initialFilename:"level.json",
-                title:"Select File", saveButtonText:"Save");
-        }
-
-        private LevelData serializeCurrentLevel()
+        public LevelData SerializeCurrentLevel()
         {
             var data = new LevelData();
             data.Size = _grid.GetSize();
@@ -316,30 +299,6 @@ namespace Visualisation
             return data;
         }
 
-        public void LoadLevel()
-        {
-            if (isPlaying) return;
-
-            SimpleFileBrowser.FileBrowser.ShowLoadDialog(
-               (path) => {
-                   PlayerPrefs.SetString("LastLevelOpened", path[0]);
-                   var fileText = File.ReadAllText(path[0]);
-                   var data = JsonUtility.FromJson<LevelData>(fileText);
-                   loadLevelData(data);
-               },
-               onCancel: null,
-               pickMode: SimpleFileBrowser.FileBrowser.PickMode.Files,
-               allowMultiSelection: false,
-               initialPath: LevelsPath,
-               initialFilename: "level.json",
-               title: "Select File", loadButtonText: "Select");
-        }
-
-        public void ShowLevels()
-        {
-            var data = JsonUtility.FromJson<LevelData>(LevelFiles[0].text);
-            loadLevelData(data);
-        }
 
         private void ClearGrid()
         {
@@ -351,7 +310,7 @@ namespace Visualisation
         }
 
 
-        private void loadLevelData(LevelData data)
+        public void LoadLevelData(LevelData data)
         {
             data.Migrate();
 
@@ -382,7 +341,7 @@ namespace Visualisation
                     _selectedTileCoord = null;
                 }
 
-                var levelData = serializeCurrentLevel();
+                var levelData = SerializeCurrentLevel();
                 _cleanLevelCopy = JsonUtility.ToJson(levelData);
                 _singleGameRun = SingleGameRun.Create(levelData);
 
@@ -411,7 +370,7 @@ namespace Visualisation
                 Quit();
                 _singleGameRun = null;
                 var cleanLevel = JsonUtility.FromJson<LevelData>(_cleanLevelCopy);
-                loadLevelData(cleanLevel);
+                LoadLevelData(cleanLevel);
             }
         }
 
