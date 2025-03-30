@@ -29,10 +29,11 @@ namespace Visualisation.HUD
 
     public class HUD : MonoBehaviour
     {
-        [SerializeField] private Button _saveButton;
-        [SerializeField] private Button _loadButton;
-        [SerializeField] private TMP_Dropdown _levelsDropdown;
         [SerializeField] private TMP_Text _runButtonText;
+        [SerializeField] private Button _saveButton;
+        [SerializeField] private Button _prevLevelButton;
+        [SerializeField] private TMP_Dropdown _levelsDropdown;
+        [SerializeField] private Button _nextLevelButton;
     
         [SerializeField] private TMP_Text _mainMessage;
         [SerializeField] private TMP_Text _smallMessage;
@@ -156,7 +157,24 @@ namespace Visualisation.HUD
             var data = JsonUtility.FromJson<LevelData>(level.text);
             GameManager.Instance.LoadLevelData(data);
         }
-        
+
+        public void OnNextLevel()
+        {
+            _levelsDropdown.value = (_levelsDropdown.value + 1) %  _levelsDropdown.options.Count;
+            OnLoadClicked();
+        }
+
+        public void OnPreviousLevel()
+        {
+            var v = _levelsDropdown.value - 1;
+            if (v < 0)
+            {
+                v += _levelsDropdown.options.Count;
+            }
+            _levelsDropdown.value = v;
+            OnLoadClicked();
+        }
+
         //
         // public void SaveLevel()
         // {
@@ -197,7 +215,8 @@ namespace Visualisation.HUD
         public void StartPlay() {
             _runButtonText.text = "Quit play";
             _saveButton.gameObject.SetActive(false);
-            _loadButton.gameObject.SetActive(false);
+            _nextLevelButton.gameObject.SetActive(false);
+            _prevLevelButton.gameObject.SetActive(false);
             _levelsDropdown.gameObject.SetActive(false);
             _doorColorPicker.gameObject.SetActive(false);
             _toolbox.SetActive(false);
@@ -208,7 +227,8 @@ namespace Visualisation.HUD
         public void EndPlay() {
             _runButtonText.text = "Play";
             _saveButton.gameObject.SetActive(true);
-            _loadButton.gameObject.SetActive(true);
+            _nextLevelButton.gameObject.SetActive(true);
+            _prevLevelButton.gameObject.SetActive(true);
             _levelsDropdown.gameObject.SetActive(true);
             _doorColorPicker.gameObject.SetActive(true);
             _toolbox.SetActive(true);
