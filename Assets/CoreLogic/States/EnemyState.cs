@@ -29,6 +29,12 @@ namespace CoreLogic.States
             
             if (_lastSeenPursueActive)
             {
+                
+                if (!_currentRun.GetGrid().GetTile(_coord)
+                        .AllowsMove(_lastSeenDirection, _currentRun.GetButtonsState()))
+                {
+                    return;
+                }
                 var adjacent = _currentRun.GetGrid().GetAdjacentTile(_coord, _lastSeenDirection);
                 if (adjacent.GetFloorType() == TileFloorType.WATER) { return; }
                 if (adjacent.GetOccupierTileType() == TileOccupierType.HERO)
@@ -38,8 +44,12 @@ namespace CoreLogic.States
                     moveTo(adjacent);
                     return;
                 }
-                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY) { return; }
-                
+
+                if (adjacent.GetOccupierTileType() != TileOccupierType.EMPTY)
+                {
+                    return;
+                }
+
                 moveTo(adjacent);
                 _lastSeenDistance -= 1;
                 if (_lastSeenDistance == 0)
@@ -59,6 +69,7 @@ namespace CoreLogic.States
             {
                 var d = (Direction)dir;
                 if (!myTile.AllowsMove(d, _currentRun.GetButtonsState())) { continue; }
+
                 seekPlayer(myTile, d);
             }
         }
@@ -70,6 +81,11 @@ namespace CoreLogic.States
             {
                 distance += 1;
                 tile = _currentRun.GetGrid().GetAdjacentTile(tile.GetCoords(), d);
+                if (tile.GetOccupierTileType() == TileOccupierType.STONE)
+                {
+                    break;
+                }
+
                 if (tile?.GetOccupierTileType() == TileOccupierType.HERO)
                 {
                     if (_lastSeenInCurrentTurn && _lastSeenDistance < distance)
@@ -82,7 +98,7 @@ namespace CoreLogic.States
                     _lastSeenDirection = d;
                     _lastSeenDistance = distance;
                     _lastSeenCoord = tile.GetCoords();
-                    Debug.Log($"enemy on {_coord}  spotted player on {tile} distance {distance}.");
+                    Debug.Log($"enemy on {_coord}  spotted player on {tile.GetCoords()} distance {distance}.");
                 }
             }
         }
