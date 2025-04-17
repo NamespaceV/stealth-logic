@@ -3320,9 +3320,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _runButtonText: {fileID: 2634271847877616784}
   _saveButton: {fileID: 2979664688223193103}
-  _prevLevelButton: {fileID: 0}
+  _prevLevelButton: {fileID: 151210981266281162}
   _levelsDropdown: {fileID: 8998489398533479279}
-  _nextLevelButton: {fileID: 0}
+  _nextLevelButton: {fileID: 3909679587743263585}
   _mainMessage: {fileID: 660678845746917275}
   _smallMessage: {fileID: 5644209505588641007}
   _toolbox: {fileID: 54976717615148220}
