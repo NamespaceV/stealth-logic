@@ -45,6 +45,8 @@ namespace Visualisation.HUD
 
         [SerializeField] private Toggle _toggle3dMap;
 
+        [SerializeField] private List<Sprite> _buttonSprites ;
+
         private List<Button> _toolboxButtons = new List<Button>();
         private List<bool> _toolboxButtonsSelected = new List<bool>();
         private int _selectedToolIdx = 0;
@@ -61,17 +63,17 @@ namespace Visualisation.HUD
             SetMainMessage("");
 
             ClearToolbox();
-            AddToolbox("Wall");
-            AddToolbox("Enemy");
-            AddToolbox("Hero");
-            AddToolbox("Exit");
-            AddToolbox("Water");
-            AddToolbox("Door");
-            AddToolbox("Gate");
-            AddToolbox("Rainbow Gate");
-            AddToolbox("Button");
-            AddToolbox("Stone");
-            AddToolbox("Portal");
+            AddToolbox("Wall", _buttonSprites[0]);
+            AddToolbox("Enemy", _buttonSprites[1]);
+            AddToolbox("Hero",  _buttonSprites[2]);
+            AddToolbox("Exit",  _buttonSprites[3]);
+            AddToolbox("Water", _buttonSprites[4]);
+            AddToolbox("Door", _buttonSprites[5]);
+            AddToolbox("Gate", _buttonSprites[6]);
+            AddToolbox("Rainbow Gate", _buttonSprites[7]);
+            AddToolbox("Button", _buttonSprites[8]);
+            AddToolbox("Stone", _buttonSprites[9]);
+            AddToolbox("Portal", _buttonSprites[10]);
 
             ToggleToolboxButton(_selectedToolIdx);
 
@@ -104,10 +106,11 @@ namespace Visualisation.HUD
             OnToggle3dMap?.Invoke(_toggle3dMap.isOn);
         }
 
-        private void AddToolbox(string name)
+        private void AddToolbox(string button_name, Sprite sprite)
         {
             var bgo = Instantiate(_toolboxButtonPrefab, _toolbox.transform);
-            bgo.GetComponentInChildren<TMP_Text>().text = name;
+            bgo.GetComponentInChildren<TMP_Text>().text = button_name;
+            bgo.GetComponentsInChildren<Image>()[1].sprite = sprite;
             var b = bgo.GetComponent<Button>();
             var buttonIdx = _toolboxButtons.Count;
             b.onClick.AddListener(() => ToolClicked(buttonIdx));

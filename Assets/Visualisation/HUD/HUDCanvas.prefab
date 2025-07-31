@@ -35,8 +35,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -56.899414, y: -253.4002}
-  m_SizeDelta: {x: 120, y: 399.995}
+  m_AnchoredPosition: {x: -87.5014, y: -250.50543}
+  m_SizeDelta: {x: 181.204, y: 405.7845}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3492880322964477274
 MonoBehaviour:
@@ -3329,6 +3329,18 @@ MonoBehaviour:
   _toolboxButtonPrefab: {fileID: 6961357186695515709, guid: cc01b9b331861f643950470688833be9, type: 3}
   _doorColorPicker: {fileID: 298823130477840811}
   _toggle3dMap: {fileID: 1842698635573129113}
+  _buttonSprites:
+  - {fileID: 671289049, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: -827938780, guid: 3bf8ffd8dce2dd04baa8b609bf21871d, type: 3}
+  - {fileID: 1222745794, guid: 57b5326bd8ac6e34cb7264074f539290, type: 3}
+  - {fileID: 671289049, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: -992895261, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: 1712620459, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: 1620722016, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: -1895631085, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: -2136276575, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: 1905341312, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
+  - {fileID: -618126883, guid: 2a4bbb16e9ca68b409ca73d944257ec1, type: 3}
 --- !u!1 &8541192785683670168
 GameObject:
   m_ObjectHideFlags: 0
@@ -3632,7 +3644,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4254744207584624717, guid: cc01b9b331861f643950470688833be9, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 120
+      value: 150.6
       objectReference: {fileID: 0}
     - target: {fileID: 4254744207584624717, guid: cc01b9b331861f643950470688833be9, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3738,7 +3750,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4254744207584624717, guid: cc01b9b331861f643950470688833be9, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 120
+      value: 145.6395
       objectReference: {fileID: 0}
     - target: {fileID: 4254744207584624717, guid: cc01b9b331861f643950470688833be9, type: 3}
       propertyPath: m_SizeDelta.y
